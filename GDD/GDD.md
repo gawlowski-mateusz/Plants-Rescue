@@ -7,7 +7,7 @@ Gry Komputerowe — Projekt, środa 9:15
 ## Spis treści
 
 - [1. Informacje ogólne](#1-informacje-ogólne)
-  - [1.1. Tytuł (roboczy)](#11-tytuł-roboczy)
+  - [1.1. Tytuł](#11-tytuł-roboczy)
   - [1.2. Gatunek](#12-gatunek)
   - [1.3. Odbiorcy](#13-odbiorcy)
   - [1.4. Platforma i wymagania sprzętowe](#14-platforma-i-wymagania-sprzętowe)
@@ -270,17 +270,22 @@ Pikselowa animacja: student leży na podłodze otoczony triumfującymi roślinam
 - Student walk
 - Student attack/use
 - Student hit / knocked back
+<img width="1536" height="1024" alt="student" src="https://github.com/user-attachments/assets/db01d58c-a2cd-4798-a4d6-3bf07c115617" />
 
 #### Stany roślin
 
 - Rośliny przyjazne: 3 warianty × stany (sucha / podlewana / nawodniona)
 - Rośliny wrogie: 4 typy × stany (idle / atak / śmierć / konwersja na ducha)
 - Palma kokosowa: 2 fazy, animowane przejście
+<img width="1536" height="1024" alt="rosliny" src="https://github.com/user-attachments/assets/d0ce3624-0ccc-4509-b101-5118cc8a0c1c" />
+
+
 
 #### Tła i obiekty
 
 - 5 map odpowiadających każdemu pokojowi
 - Meble jako niezależne obiekty (sofa, stolik, łóżko, lodówka)
+<img width="1536" height="1024" alt="pokoj" src="https://github.com/user-attachments/assets/34bfd26e-a813-4e92-8cbf-9283b25674db" />
 
 #### UI
 
@@ -288,6 +293,9 @@ Pikselowa animacja: student leży na podłodze otoczony triumfującymi roślinam
 - Serduszka (pełne / puste) — pixel art
 - Pasek nawodnienia
 - Pixel font (np. „Press Start 2P” — Google Fonts, open license)
+  ![czcionkajpg](https://github.com/user-attachments/assets/0e51ceb9-c0ea-454c-ab2c-d4d23ebf7171)
+<img width="1600" height="840" alt="czcionka3" src="https://github.com/user-attachments/assets/7c24dfaf-afdd-4a02-a1c6-efd745b77e00" />
+
 
 #### Narzędzia graficzne
 
