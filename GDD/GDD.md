@@ -167,7 +167,7 @@ Każda roślina przyjazna posiada pasek nawodnienia (0--100%). Gracz musi uzupe�
 
 | Przedmiot | Działanie |
 |---|---|
-| **Zbiornik (woda / kwas solny)** |    Broń dystansowa -- gracz mierzy i wystrzeliwuje substancję w łuku. Im większy dystans do celu, tym wyżej należy celować, aby substancja dolecia do celu (fizyka pocisku). Woda służy wyłącznie do podlewania przyjaznych roślin (napełnia pasek +20% na trafienie). Kwas solny służy do atakowania wrogich roślin (zadaje 1 punkt obrażeń na trafienie). Zbiornik posiada dwa osobne wskaźniki poziomu napełnienia: 💧 Woda i 🧪 Kwas solny. Uzupełnianie zapasów możliwe wyłącznie w łazience, do której prowadzą drzwi boczne w każdym pokoju (poziomie). |
+| **Zbiornik (woda / kwas solny)** |    Broń dystansowa -- gracz mierzy i wystrzeliwuje substancję w łuku. Im większy dystans do celu, tym wyżej należy celować, aby substancja doleciała do celu (fizyka pocisku). Woda służy wyłącznie do podlewania przyjaznych roślin (napełnia pasek +20% na trafienie). Kwas solny służy do atakowania wrogich roślin (zadaje 1 punkt obrażeń na trafienie). Zbiornik posiada dwa osobne wskaźniki poziomu napełnienia: 💧 Woda i 🧪 Kwas solny. Uzupełnianie zapasów możliwe wyłącznie w łazience, do której prowadzą drzwi boczne w każdym pokoju (poziomie). |
 | **Nożyczki** | Atak — zadaje 1 punkt obrażeń wrogiemu stworzeniu. Na przyjaznej roślinie: roślina natychmiast staje się wroga. Cooldown: 1 s. |
 | **Piwo** | Jednorazowe użycie, zapas w ekwipunku do końca sesji gry. Wypicie: prędkość gracza +50% przez 10 sekund. Efekt wizualny: lekkie rozmazanie ekranu. |
 
