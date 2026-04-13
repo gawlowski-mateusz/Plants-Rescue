@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_oljgk"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_oljgk"]
+radius = 4.0
+
+[node name="Projectile" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+z_index = 5
+script = ExtResource("1_oljgk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_oljgk")
+
+[node name="Outer" type="Polygon2D" parent="."]
+color = Color(0.18, 0.58, 1, 0.95)
+polygon = PackedVector2Array(-4, 0, -3, -3, 0, -4, 3, -3, 4, 0, 3, 3, 0, 4, -3, 3)
+
+[node name="Core" type="Polygon2D" parent="."]
+color = Color(0.78, 0.93, 1, 0.95)
+polygon = PackedVector2Array(-2, 0, -1.5, -1.5, 0, -2, 1.5, -1.5, 2, 0, 1.5, 1.5, 0, 2, -1.5, 1.5)
