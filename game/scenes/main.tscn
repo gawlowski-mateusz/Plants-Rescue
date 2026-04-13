@@ -22,3 +22,4 @@ position = Vector2(351, 292)
 [node name="WaterTankUI" parent="UI" instance=ExtResource("3_0j6x0")]
 
 [connection signal="water_capacity_changed" from="Player" to="UI/WaterTankUI" method="_on_player_water_capacity_changed"]
+[connection signal="shot_mode_changed" from="Player" to="UI/WaterTankUI" method="_on_player_shot_mode_changed"]

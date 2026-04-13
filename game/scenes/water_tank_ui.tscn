@@ -90,7 +90,21 @@ value = 100.0
 theme_override_styles/background = SubResource("StyleBoxFlat_md75p")
 theme_override_styles/fill = SubResource("StyleBoxFlat_cj7t4")
 
-[node name="Value" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+[node name="StatusRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="Value" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.752941, 0.92549, 1, 1)
 text = "100 / 100"
+
+[node name="ModeIcon" type="ColorRect" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+color = Color(0.305882, 0.756863, 1, 1)
+
+[node name="ModeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.752941, 0.92549, 1, 1)
+text = "WATER"

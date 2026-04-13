@@ -11,6 +11,7 @@ const WATER_SHOT_COST: int = 10
 enum ShotMode { WATER, ACID }
 
 signal water_capacity_changed(current: int, max_capacity: int)
+signal shot_mode_changed(mode: int)
 
 
 var last_direction: Vector2 = Vector2.RIGHT
@@ -32,11 +33,12 @@ var current_water_capacity: int = MAX_WATER_CAPACITY
 func _ready() -> void:
 	# Initialise hitbox offset
 	hitbox_offset = hitbox.position
-	call_deferred("emit_initial_water_capacity")
+	call_deferred("emit_initial_ui_state")
 
 
-func emit_initial_water_capacity() -> void:
+func emit_initial_ui_state() -> void:
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+	shot_mode_changed.emit(int(shot_mode))
 
 
 func _physics_process(_delta: float) -> void:
@@ -116,6 +118,8 @@ func toggle_shot_mode() -> void:
 		shot_mode = ShotMode.ACID
 	else:
 		shot_mode = ShotMode.WATER
+
+	shot_mode_changed.emit(int(shot_mode))
 
 
 func try_shoot() -> void:
