@@ -23,3 +23,4 @@ position = Vector2(351, 292)
 
 [connection signal="water_capacity_changed" from="Player" to="UI/WaterTankUI" method="_on_player_water_capacity_changed"]
 [connection signal="shot_mode_changed" from="Player" to="UI/WaterTankUI" method="_on_player_shot_mode_changed"]
+[connection signal="acid_status_changed" from="Player" to="UI/WaterTankUI" method="_on_player_acid_status_changed"]

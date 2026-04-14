@@ -7,11 +7,15 @@ const SHOT_COOLDOWN: float = 0.2
 const PROJECTILE_SPAWN_OFFSET: float = 28.0
 const MAX_WATER_CAPACITY: int = 100
 const WATER_SHOT_COST: int = 10
+const MAX_ACID_CAPACITY: int = 100
+const ACID_SHOT_COST: int = 10
+const ACID_REFILL_COOLDOWN: float = 7.0
 
 enum ShotMode { WATER, ACID }
 
 signal water_capacity_changed(current: int, max_capacity: int)
 signal shot_mode_changed(mode: int)
+signal acid_status_changed(current: int, max_capacity: int, is_cooling_down: bool, cooldown_left: float)
 
 
 var last_direction: Vector2 = Vector2.RIGHT
@@ -23,6 +27,9 @@ var shot_cooldown_left: float = 0.0
 var is_target_lock_enabled: bool = false
 var locked_target: Node2D = null
 var current_water_capacity: int = MAX_WATER_CAPACITY
+var current_acid_capacity: int = MAX_ACID_CAPACITY
+var is_acid_cooling_down: bool = false
+var acid_cooldown_left: float = 0.0
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
@@ -39,6 +46,7 @@ func _ready() -> void:
 func emit_initial_ui_state() -> void:
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
 	shot_mode_changed.emit(int(shot_mode))
+	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, is_acid_cooling_down, acid_cooldown_left)
 
 
 func _physics_process(_delta: float) -> void:
@@ -47,6 +55,13 @@ func _physics_process(_delta: float) -> void:
 
 	if shot_cooldown_left > 0.0:
 		shot_cooldown_left = max(shot_cooldown_left - _delta, 0.0)
+
+	if is_acid_cooling_down:
+		acid_cooldown_left = max(acid_cooldown_left - _delta, 0.0)
+		acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, true, acid_cooldown_left)
+
+		if acid_cooldown_left <= 0.0:
+			finish_acid_cooldown()
 
 	if Input.is_action_just_pressed("toggle_shot_mode"):
 		toggle_shot_mode()
@@ -129,6 +144,14 @@ func try_shoot() -> void:
 	if shot_mode == ShotMode.WATER and current_water_capacity < WATER_SHOT_COST:
 		return
 
+	if shot_mode == ShotMode.ACID:
+		if is_acid_cooling_down:
+			return
+
+		if current_acid_capacity < ACID_SHOT_COST:
+			start_acid_cooldown()
+			return
+
 	var direction := get_shoot_direction()
 	if direction == Vector2.ZERO:
 		direction = last_direction.normalized()
@@ -137,6 +160,8 @@ func try_shoot() -> void:
 
 	if shot_mode == ShotMode.WATER:
 		consume_water(WATER_SHOT_COST)
+	elif shot_mode == ShotMode.ACID:
+		consume_acid(ACID_SHOT_COST)
 
 	shot_cooldown_left = SHOT_COOLDOWN
 
@@ -163,9 +188,35 @@ func consume_water(amount: int) -> void:
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
 
 
+func consume_acid(amount: int) -> void:
+	current_acid_capacity = max(current_acid_capacity - amount, 0)
+
+	if current_acid_capacity <= 0:
+		start_acid_cooldown()
+		return
+
+	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, false, 0.0)
+
+
 func refill_water_tank() -> void:
 	current_water_capacity = MAX_WATER_CAPACITY
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+
+
+func start_acid_cooldown() -> void:
+	if is_acid_cooling_down:
+		return
+
+	is_acid_cooling_down = true
+	acid_cooldown_left = ACID_REFILL_COOLDOWN
+	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, true, acid_cooldown_left)
+
+
+func finish_acid_cooldown() -> void:
+	is_acid_cooling_down = false
+	acid_cooldown_left = 0.0
+	current_acid_capacity = MAX_ACID_CAPACITY
+	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, false, acid_cooldown_left)
 
 
 func get_shoot_direction() -> Vector2:
