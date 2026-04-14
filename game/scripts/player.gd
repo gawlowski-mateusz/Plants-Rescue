@@ -10,12 +10,14 @@ const WATER_SHOT_COST: int = 10
 const MAX_ACID_CAPACITY: int = 100
 const ACID_SHOT_COST: int = 10
 const ACID_REFILL_COOLDOWN: float = 7.0
+const MAX_HEALTH: int = 90
 
 enum ShotMode { WATER, ACID }
 
 signal water_capacity_changed(current: int, max_capacity: int)
 signal shot_mode_changed(mode: int)
 signal acid_status_changed(current: int, max_capacity: int, is_cooling_down: bool, cooldown_left: float)
+signal health_changed(current: int, max_health: int)
 
 
 var last_direction: Vector2 = Vector2.RIGHT
@@ -30,6 +32,7 @@ var current_water_capacity: int = MAX_WATER_CAPACITY
 var current_acid_capacity: int = MAX_ACID_CAPACITY
 var is_acid_cooling_down: bool = false
 var acid_cooldown_left: float = 0.0
+var current_health: int = MAX_HEALTH
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
@@ -47,9 +50,14 @@ func emit_initial_ui_state() -> void:
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
 	shot_mode_changed.emit(int(shot_mode))
 	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, is_acid_cooling_down, acid_cooldown_left)
+	health_changed.emit(current_health, MAX_HEALTH)
 
 
 func _physics_process(_delta: float) -> void:
+	if current_health <= 0:
+		velocity = Vector2.ZERO
+		return
+
 	# Disable hitbox until an attack is triggered
 	hitbox.monitoring = false
 
@@ -296,3 +304,23 @@ func update_hitbox_offset() -> void:
 func _on_hitbox_body_entered(body: Node2D) -> void:
 	if is_attacking and body.name.begins_with("Slime"):
 		body.take_damage(strenght, position)
+
+
+func take_damage(damage: int) -> void:
+	if current_health <= 0:
+		return
+
+	current_health = max(current_health - damage, 0)
+	health_changed.emit(current_health, MAX_HEALTH)
+
+	if current_health <= 0:
+		die()
+
+
+func die() -> void:
+	is_attacking = false
+	velocity = Vector2.ZERO
+	hitbox.monitoring = false
+	$CollisionShape2D.set_deferred("disabled", true)
+	$Hitbox/CollisionShape2D.set_deferred("disabled", true)
+	animated_sprite_2d.play("dying")

@@ -278,7 +278,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_i4ail")
 }],
-"loop": true,
+"loop": false,
 "name": &"dying",
 "speed": 5.0
 }, {
@@ -434,8 +434,7 @@ script = ExtResource("1_g2els")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=475447348]
 scale = Vector2(4, 4)
 sprite_frames = SubResource("SpriteFrames_8f1cb")
-animation = &"attack_right"
-frame = 1
+animation = &"dying"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2063646738]
 position = Vector2(-2, -5.5)
