@@ -7,8 +7,10 @@ const MAX_HEALTH: int = HEART_COUNT * HEALTH_PER_HEART
 
 const HEART_WIDTH: int = 7
 const HEART_HEIGHT: int = 6
-const PIXEL_SIZE: float = 8.0
+const PIXEL_SIZE: float = 6.0
 const HEART_SPACING: float = 8.0
+const DRAW_OFFSET_X: float = 10.0
+const DRAW_OFFSET_Y: float = 36.0
 
 const HEART_ROWS := [
 	"0110110",
@@ -47,7 +49,7 @@ func _draw_heart(heart_index: int) -> void:
 			if row.substr(x, 1) != "1":
 				continue
 
-			var pixel_pos := Vector2(heart_offset_x + (x * PIXEL_SIZE), y * PIXEL_SIZE)
+			var pixel_pos := Vector2(DRAW_OFFSET_X + heart_offset_x + (x * PIXEL_SIZE), DRAW_OFFSET_Y + y * PIXEL_SIZE)
 			var pixel_rect := Rect2(pixel_pos, Vector2(PIXEL_SIZE, PIXEL_SIZE))
 			var pixel_color := FILLED_COLOR if x < filled_columns else EMPTY_COLOR
 			draw_rect(pixel_rect, pixel_color, true)

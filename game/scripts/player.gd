@@ -12,6 +12,12 @@ const ACID_SHOT_COST: int = 10
 const ACID_REFILL_COOLDOWN: float = 7.0
 const MAX_HEALTH: int = 90
 
+# Tank regeneration: starts after this many seconds without taking damage,
+# then refills at the given rates (per second).
+const REGEN_DELAY: float = 2.5
+const WATER_REGEN_PER_SEC: float = 18.0
+const ACID_REGEN_PER_SEC: float = 12.0
+
 enum ShotMode { WATER, ACID }
 
 signal water_capacity_changed(current: int, max_capacity: int)
@@ -33,6 +39,13 @@ var current_acid_capacity: int = MAX_ACID_CAPACITY
 var is_acid_cooling_down: bool = false
 var acid_cooldown_left: float = 0.0
 var current_health: int = MAX_HEALTH
+var input_locked: bool = false
+
+# Time since the player last took damage. Tanks regen only after REGEN_DELAY.
+var time_since_damage: float = 999.0
+var _water_acc: float = 0.0
+var _acid_acc: float = 0.0
+var _water_depleted: bool = false
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
@@ -58,11 +71,22 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 
+	if input_locked:
+		velocity = Vector2.ZERO
+		hitbox.monitoring = false
+		play_animation("idle", last_direction)
+		move_and_slide()
+		return
+
 	# Disable hitbox until an attack is triggered
 	hitbox.monitoring = false
 
 	if shot_cooldown_left > 0.0:
 		shot_cooldown_left = max(shot_cooldown_left - _delta, 0.0)
+
+	# Tank regeneration when not recently damaged
+	time_since_damage += _delta
+	_process_tank_regen(_delta)
 
 	if is_acid_cooling_down:
 		acid_cooldown_left = max(acid_cooldown_left - _delta, 0.0)
@@ -194,6 +218,8 @@ func spawn_projectile(direction: Vector2) -> void:
 func consume_water(amount: int) -> void:
 	current_water_capacity = max(current_water_capacity - amount, 0)
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+	if current_water_capacity <= 0:
+		_water_depleted = true
 
 
 func consume_acid(amount: int) -> void:
@@ -306,10 +332,32 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		body.take_damage(strenght, position)
 
 
+func _process_tank_regen(delta: float) -> void:
+	if time_since_damage < REGEN_DELAY:
+		_water_acc = 0.0
+		return
+
+	# Water tank regen only when it was fully depleted.
+	# Keeps regenerating until it reaches max; then stops.
+	if _water_depleted:
+		_water_acc += WATER_REGEN_PER_SEC * delta
+		var water_add := int(_water_acc)
+		if water_add > 0:
+			_water_acc -= float(water_add)
+			current_water_capacity = min(current_water_capacity + water_add, MAX_WATER_CAPACITY)
+			water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+			if current_water_capacity >= MAX_WATER_CAPACITY:
+				_water_depleted = false
+				_water_acc = 0.0
+	else:
+		_water_acc = 0.0
+
+
 func take_damage(damage: int) -> void:
 	if current_health <= 0:
 		return
 
+	time_since_damage = 0.0
 	current_health = max(current_health - damage, 0)
 	health_changed.emit(current_health, MAX_HEALTH)
 

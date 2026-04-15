@@ -1,0 +1,200 @@
+[gd_scene load_steps=13 format=3 uid="uid://mainmenu0001"]
+
+[ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="2_menu"]
+[ext_resource type="Texture2D" path="res://assets/images/plant_friendly.png" id="3_plant"]
+[ext_resource type="Texture2D" path="res://assets/images/enemies/Cactus.png" id="4_cactus"]
+[ext_resource type="FontFile" uid="uid://1xumrtike0fb" path="res://assets/fonts/PressStart2P.ttf" id="5_titlefont"]
+
+[sub_resource type="AtlasTexture" id="AT_plant_menu"]
+atlas = ExtResource("3_plant")
+region = Rect2(0, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_0"]
+atlas = ExtResource("4_cactus")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_1"]
+atlas = ExtResource("4_cactus")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_2"]
+atlas = ExtResource("4_cactus")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_3"]
+atlas = ExtResource("4_cactus")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_atk_0"]
+atlas = ExtResource("4_cactus")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_cactus_atk_1"]
+atlas = ExtResource("4_cactus")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SF_cactus"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_cactus_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_cactus_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_cactus_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_cactus_3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_cactus_atk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_cactus_atk_1")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 7.0
+}]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_theme")
+script = ExtResource("2_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.05, 0.04, 1)
+
+[node name="VignetteTop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 90.0
+color = Color(0.16, 0.10, 0.06, 1)
+
+[node name="VignetteBottom" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -90.0
+color = Color(0.16, 0.10, 0.06, 1)
+
+[node name="DecorPlantLeft" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 380.0
+offset_right = 252.0
+offset_bottom = 572.0
+texture = SubResource("AT_plant_menu")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="DecorPlantRight" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 380.0
+offset_right = 1092.0
+offset_bottom = 572.0
+texture = SubResource("AT_plant_menu")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="Cactus" type="AnimatedSprite2D" parent="."]
+position = Vector2(700, 480)
+scale = Vector2(3.2, 3.2)
+sprite_frames = SubResource("SF_cactus")
+animation = &"walk"
+autoplay = "walk"
+flip_h = true
+modulate = Color(0.80, 0.95, 0.80, 1)
+
+[node name="CenterColumn" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -280.0
+offset_right = 380.0
+offset_bottom = 60.0
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 72
+text = "PLANTS RESCUE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70, 0.90, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.15, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 40
+text = "Apokalipsa roślin"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterColumn"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="CenterColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Zagraj w demo"
+
+[node name="PressHint" type="Label" parent="CenterColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.65, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "naciśnij SPACJĘ lub kliknij ZAGRAJ"
+horizontal_alignment = 1
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -50.0
+offset_right = 300.0
+offset_bottom = -10.0
+theme_override_colors/font_color = Color(0.55, 0.45, 0.30, 1)
+theme_override_font_sizes/font_size = 16
+text = "v0.1 demo — poziom tutorialowy"
+horizontal_alignment = 1

@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://c1lqeavef33s7"]
+
+[ext_resource type="Texture2D" path="res://assets/images/plant_friendly.png" id="1_plant"]
+[ext_resource type="Script" uid="uid://co0a30kyay0wr" path="res://scripts/friendly_plant.gd" id="2_n5e6t"]
+[ext_resource type="PackedScene" path="res://scenes/water_bar.tscn" id="3_49f30"]
+[ext_resource type="Texture2D" path="res://assets/images/plant_bloomed.png" id="4_bloom"]
+
+[sub_resource type="AtlasTexture" id="AT_idle0"]
+atlas = ExtResource("1_plant")
+region = Rect2(0, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AT_idle1"]
+atlas = ExtResource("1_plant")
+region = Rect2(72, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AT_idle2"]
+atlas = ExtResource("1_plant")
+region = Rect2(144, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AT_idle3"]
+atlas = ExtResource("1_plant")
+region = Rect2(216, 0, 72, 72)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_plant"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_idle1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_idle2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_idle3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_plant"]
+size = Vector2(32, 32)
+
+[node name="FriendlyPlant" type="CharacterBody2D" unique_id=505632338]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_n5e6t")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=72923383]
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_plant")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="BloomedSprite" type="Sprite2D" parent="."]
+visible = false
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("4_bloom")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1902631392]
+shape = SubResource("RectangleShape2D_plant")
+
+[node name="WaterBar" parent="." unique_id=999549957 instance=ExtResource("3_49f30")]
+position = Vector2(-18, 18)
+scale = Vector2(2, 2)
+
+[node name="WateredLabel" type="Label" parent="." unique_id=1925593363]
+visible = false
+offset_left = -25.0
+offset_top = -50.0
+offset_right = 75.0
+offset_bottom = -28.0
+theme_override_colors/font_color = Color(0.670588, 0.980392, 1, 1)
+text = "Uratowana!"
+horizontal_alignment = 1

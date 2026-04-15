@@ -1,93 +1,99 @@
 [gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/water_tank_ui.gd" id="1_j0ue7"]
+[ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="2_theme"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg7f2"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.0862745, 0.109804, 0.152941, 0.93)
+[sub_resource type="StyleBoxFlat" id="SB_panel"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.08, 0.05, 0.94)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.70, 0.30, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_barframe"]
+bg_color = Color(0.08, 0.05, 0.03, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.337255, 0.411765, 0.494118, 1)
+border_color = Color(0.55, 0.40, 0.18, 1)
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2txul"]
-bg_color = Color(0.0470588, 0.0627451, 0.0941176, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.211765, 0.278431, 0.356863, 1)
+[sub_resource type="StyleBoxFlat" id="SB_barbg"]
+bg_color = Color(0.18, 0.12, 0.06, 1)
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_md75p"]
-bg_color = Color(0.0705882, 0.0901961, 0.12549, 1)
-border_width_left = 1
+[sub_resource type="StyleBoxFlat" id="SB_waterfill"]
+bg_color = Color(0.30, 0.62, 0.95, 1)
 border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.12549, 0.160784, 0.219608, 1)
+border_color = Color(0.70, 0.90, 1, 1)
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cj7t4"]
-bg_color = Color(0.152941, 0.572549, 0.917647, 1)
-border_width_left = 1
+[sub_resource type="StyleBoxFlat" id="SB_acidfill"]
+bg_color = Color(0.45, 0.85, 0.30, 1)
 border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.607843, 0.882353, 1, 1)
-anti_aliasing = false
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1tg5v"]
-bg_color = Color(0.290196, 0.776471, 0.321569, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.780392, 1, 0.647059, 1)
+border_color = Color(0.80, 1, 0.55, 1)
 anti_aliasing = false
 
 [node name="WaterTankUI" type="Control"]
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -260.0
+offset_left = -280.0
 offset_top = 14.0
 offset_right = -14.0
-offset_bottom = 160.0
+offset_bottom = 200.0
 mouse_filter = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_j0ue7")
 
 [node name="Panel" type="Panel" parent="."]
-offset_right = 246.0
-offset_bottom = 146.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_bg7f2")
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_styles/panel = SubResource("SB_panel")
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel"]
-offset_left = 8.0
-offset_top = 6.0
-offset_right = 238.0
-offset_bottom = 140.0
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -10.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+; ------- WATER -------
+[node name="WaterHeader" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.752941, 0.92549, 1, 1)
-text = "WATER TANK"
+
+[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer/WaterHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.92, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "WODA"
+
+[node name="ModeTag" type="Label" parent="Panel/MarginContainer/VBoxContainer/WaterHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.30, 0.62, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "[AKTYWNA]"
 
 [node name="BarFrame" type="Panel" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 24)
-theme_override_styles/panel = SubResource("StyleBoxFlat_2txul")
+custom_minimum_size = Vector2(0, 26)
+theme_override_styles/panel = SubResource("SB_barframe")
 
 [node name="WaterBar" type="ProgressBar" parent="Panel/MarginContainer/VBoxContainer/BarFrame"]
 anchor_right = 1.0
@@ -98,43 +104,48 @@ offset_right = -3.0
 offset_bottom = -3.0
 show_percentage = false
 value = 100.0
-theme_override_styles/background = SubResource("StyleBoxFlat_md75p")
-theme_override_styles/fill = SubResource("StyleBoxFlat_cj7t4")
+theme_override_styles/background = SubResource("SB_barbg")
+theme_override_styles/fill = SubResource("SB_waterfill")
 
-[node name="StatusRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Value" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.752941, 0.92549, 1, 1)
+[node name="Value" type="Label" parent="Panel/MarginContainer/VBoxContainer/BarFrame"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
 text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ModeIcon" type="ColorRect" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
-custom_minimum_size = Vector2(10, 10)
-layout_mode = 2
-color = Color(0.305882, 0.756863, 1, 1)
-
-[node name="ModeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatusRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.752941, 0.92549, 1, 1)
-text = "WATER"
-
-[node name="AcidTitle" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.780392, 1, 0.647059, 1)
-text = "ACID TANK"
-
-[node name="AcidRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+; ------- ACID -------
+[node name="AcidHeader" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="AcidBarFrame" type="Panel" parent="Panel/MarginContainer/VBoxContainer/AcidRow"]
+[node name="AcidTitle" type="Label" parent="Panel/MarginContainer/VBoxContainer/AcidHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 24)
-theme_override_styles/panel = SubResource("StyleBoxFlat_2txul")
+theme_override_colors/font_color = Color(0.78, 1, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "KWAS"
 
-[node name="AcidBar" type="ProgressBar" parent="Panel/MarginContainer/VBoxContainer/AcidRow/AcidBarFrame"]
+[node name="AcidCooldown" type="Label" parent="Panel/MarginContainer/VBoxContainer/AcidHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 1, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "Gotowy"
+
+[node name="AcidBarFrame" type="Panel" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 26)
+theme_override_styles/panel = SubResource("SB_barframe")
+
+[node name="AcidBar" type="ProgressBar" parent="Panel/MarginContainer/VBoxContainer/AcidBarFrame"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 3.0
@@ -143,12 +154,5 @@ offset_right = -3.0
 offset_bottom = -3.0
 show_percentage = false
 value = 100.0
-theme_override_styles/background = SubResource("StyleBoxFlat_md75p")
-theme_override_styles/fill = SubResource("StyleBoxFlat_1tg5v")
-
-[node name="AcidCooldown" type="Label" parent="Panel/MarginContainer/VBoxContainer/AcidRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(54, 0)
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.780392, 1, 0.647059, 1)
-text = "Ready"
+theme_override_styles/background = SubResource("SB_barbg")
+theme_override_styles/fill = SubResource("SB_acidfill")
