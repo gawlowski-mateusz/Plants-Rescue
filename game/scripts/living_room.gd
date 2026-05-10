@@ -53,7 +53,7 @@ func _ready() -> void:
 		if plant.has_signal("plant_fully_watered"):
 			plant.plant_fully_watered.connect(_on_plant_watered)
 		if plant.has_signal("corrupted_into_enemy"):
-			plant.corrupted_into_enemy.connect(_on_plant_corrupted_into_enemy)
+			plant.corrupted_into_enemy.connect(_on_plant_corrupted_into_enemy.bind(plant))
 
 	# Connect enemies
 	for enemy in $Enemies.get_children():
@@ -94,15 +94,21 @@ func _on_plant_watered() -> void:
 	_check_objectives()
 
 
-func _on_plant_corrupted_into_enemy(enemy: Node2D) -> void:
+func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 	# Make sure we count the corrupted enemy kill.
 	if enemy != null and enemy.has_signal("died"):
 		var died_cb := Callable(self, "_on_enemy_died")
 		if not enemy.is_connected("died", died_cb):
 			enemy.connect("died", died_cb)
 
-	# A corrupted plant no longer needs rescuing, so reduce the objective total.
-	plants_to_rescue_total = maxi(plants_to_rescue_total - 1, 0)
+	var was_watered := false
+	if plant is FriendlyPlant:
+		was_watered = plant.is_watered
+
+	# If the plant was not watered yet, it no longer needs rescuing.
+	# If it was watered, keep the plant objective unchanged.
+	if not was_watered:
+		plants_to_rescue_total = maxi(plants_to_rescue_total - 1, 0)
 	# The corrupted plant becomes an extra enemy that must be defeated.
 	enemies_to_kill_total += 1
 	_update_labels()

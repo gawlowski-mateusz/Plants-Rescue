@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://co0a30kyay0wr" path="res://scripts/friendly_plant.gd" id="2_n5e6t"]
 [ext_resource type="PackedScene" path="res://scenes/water_bar.tscn" id="3_49f30"]
 [ext_resource type="Texture2D" path="res://assets/images/plant_bloomed.png" id="4_bloom"]
+[ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="5_theme"]
 
 [sub_resource type="AtlasTexture" id="AT_idle0"]
 atlas = ExtResource("1_plant")
@@ -76,3 +77,21 @@ offset_bottom = -28.0
 theme_override_colors/font_color = Color(0.670588, 0.980392, 1, 1)
 text = "Uratowana!"
 horizontal_alignment = 1
+
+[node name="DialogLabel" type="Label" parent="." unique_id=1466792874]
+visible = false
+offset_left = -120.0
+offset_top = -92.0
+offset_right = 120.0
+offset_bottom = -40.0
+mouse_filter = 2
+theme = ExtResource("5_theme")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+z_index = 10

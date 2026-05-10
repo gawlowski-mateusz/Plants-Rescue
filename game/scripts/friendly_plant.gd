@@ -7,6 +7,11 @@ const WATER_PER_SHOT: int = 20
 
 const DEFAULT_ENEMY_SCALE: Vector2 = Vector2(2.0, 2.0)
 
+const WATERED_HITS_TO_CORRUPT: int = 3
+const WATERED_CORRUPT_DELAY_SEC: float = 0.6
+const DIALOG_VISIBLE_SEC: float = 2.0
+const DIALOG_FADE_SEC: float = 0.25
+
 @export var corrupted_enemy_scene: PackedScene = preload("res://scenes/slime.tscn")
 
 signal plant_fully_watered
@@ -16,10 +21,15 @@ var water_level: int = 0
 var is_watered: bool = false
 var _is_corrupted: bool = false
 
+var _watered_hits_taken: int = 0
+var _pending_corrupt: bool = false
+var _dialog_tween: Tween = null
+
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var bloomed_sprite: Sprite2D = $BloomedSprite
 @onready var water_bar: Node2D = $WaterBar
 @onready var watered_label: Label = $WateredLabel
+@onready var dialog_label: Label = $DialogLabel
 
 
 func _ready() -> void:
@@ -27,6 +37,7 @@ func _ready() -> void:
 	# Start pale/desaturated to show it's wilted
 	animated_sprite_2d.modulate = Color(0.82, 0.86, 0.70, 1.0)
 	watered_label.visible = false
+	dialog_label.visible = false
 	water_bar.update_water(water_level)
 
 
@@ -50,11 +61,58 @@ func water(amount: int = WATER_PER_SHOT) -> void:
 
 func take_damage(_damage: int, _attacker_position: Vector2) -> void:
 	# Friendly plants can be corrupted into enemies by acid or scissors.
-	if is_watered:
-		return
+	# - Unwatered plant: corrupt instantly (to avoid blocking level completion).
+	# - Watered plant: needs 3 hits; shows a short dialog after each hit.
 	if _is_corrupted:
 		return
-	_corrupt_into_enemy()
+	if _pending_corrupt:
+		return
+
+	if not is_watered:
+		_corrupt_into_enemy()
+		return
+
+	_watered_hits_taken += 1
+	match _watered_hits_taken:
+		1:
+			_show_dialog("Nie zrobilam ci krzywdy... :/")
+			return
+		2:
+			_show_dialog("To mnie boli, zaraz sie zezloszcze...")
+			return
+		_:
+			_show_dialog("Ostrzegalam!!!")
+
+	if _watered_hits_taken >= WATERED_HITS_TO_CORRUPT:
+		_pending_corrupt = true
+		await get_tree().create_timer(WATERED_CORRUPT_DELAY_SEC).timeout
+		if is_inside_tree() and not _is_corrupted:
+			_corrupt_into_enemy()
+
+
+func _show_dialog(text: String) -> void:
+	if dialog_label == null:
+		return
+	if text.is_empty():
+		dialog_label.visible = false
+		return
+
+	dialog_label.text = text
+	dialog_label.visible = true
+	dialog_label.modulate = Color(1, 1, 1, 1)
+
+	if _dialog_tween != null and _dialog_tween.is_valid():
+		_dialog_tween.kill()
+	_dialog_tween = create_tween()
+	_dialog_tween.tween_interval(DIALOG_VISIBLE_SEC)
+	_dialog_tween.tween_property(dialog_label, "modulate:a", 0.0, DIALOG_FADE_SEC)
+	_dialog_tween.tween_callback(Callable(self, "_hide_dialog"))
+
+
+func _hide_dialog() -> void:
+	if dialog_label == null:
+		return
+	dialog_label.visible = false
 
 
 func _corrupt_into_enemy() -> void:
