@@ -12,6 +12,9 @@ const ACID_SHOT_COST: int = 10
 const ACID_REFILL_COOLDOWN: float = 7.0
 const MAX_HEALTH: int = 90
 
+const BEER_SPEED_MULTIPLIER: float = 1.5
+const BEER_EFFECT_DURATION: float = 10.0
+
 # Tank regeneration: starts after this many seconds without taking damage,
 # then refills at the given rates (per second).
 const REGEN_DELAY: float = 2.5
@@ -24,6 +27,10 @@ signal water_capacity_changed(current: int, max_capacity: int)
 signal shot_mode_changed(mode: int)
 signal acid_status_changed(current: int, max_capacity: int, is_cooling_down: bool, cooldown_left: float)
 signal health_changed(current: int, max_health: int)
+
+signal beer_count_changed(count: int)
+signal beer_effect_active_changed(active: bool)
+signal beer_effect_time_left_changed(time_left: float)
 
 
 var last_direction: Vector2 = Vector2.RIGHT
@@ -40,6 +47,11 @@ var is_acid_cooling_down: bool = false
 var acid_cooldown_left: float = 0.0
 var current_health: int = MAX_HEALTH
 var input_locked: bool = false
+
+var beer_count: int = 0
+var _beer_effect_left: float = 0.0
+var _beer_effect_active: bool = false
+var _move_speed_multiplier: float = 1.0
 
 # Time since the player last took damage. Tanks regen only after REGEN_DELAY.
 var time_since_damage: float = 999.0
@@ -64,9 +76,14 @@ func emit_initial_ui_state() -> void:
 	shot_mode_changed.emit(int(shot_mode))
 	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, is_acid_cooling_down, acid_cooldown_left)
 	health_changed.emit(current_health, MAX_HEALTH)
+	beer_count_changed.emit(beer_count)
+	beer_effect_active_changed.emit(false)
+	beer_effect_time_left_changed.emit(0.0)
 
 
 func _physics_process(_delta: float) -> void:
+	_process_beer_effect(_delta)
+
 	if current_health <= 0:
 		velocity = Vector2.ZERO
 		return
@@ -104,6 +121,9 @@ func _physics_process(_delta: float) -> void:
 	if is_target_lock_enabled and not is_instance_valid(locked_target):
 		disable_target_lock()
 
+	if Input.is_action_just_pressed("use_beer"):
+		try_use_beer()
+
 	if Input.is_action_pressed("shoot"):
 		try_shoot()
 	
@@ -130,7 +150,7 @@ func process_movement() -> void:
 	var direction := Input.get_vector("left", "right", "up", "down")
 	
 	if direction != Vector2.ZERO:
-		velocity = direction * SPEED
+		velocity = direction * SPEED * _move_speed_multiplier
 		last_direction = direction
 		update_hitbox_offset()
 	else:
@@ -269,11 +289,36 @@ func toggle_target_lock() -> void:
 	if target:
 		locked_target = target
 		is_target_lock_enabled = true
+		_bind_locked_target_signals()
 
 
 func disable_target_lock() -> void:
+	_unbind_locked_target_signals()
 	is_target_lock_enabled = false
 	locked_target = null
+
+
+func _bind_locked_target_signals() -> void:
+	if not is_instance_valid(locked_target):
+		return
+
+	var died_cb := Callable(self, "_on_locked_target_died")
+	if locked_target.has_signal("died") and not locked_target.is_connected("died", died_cb):
+		locked_target.connect("died", died_cb)
+
+
+func _unbind_locked_target_signals() -> void:
+	if not is_instance_valid(locked_target):
+		return
+
+	var died_cb := Callable(self, "_on_locked_target_died")
+	if locked_target.has_signal("died") and locked_target.is_connected("died", died_cb):
+		locked_target.disconnect("died", died_cb)
+
+
+func _on_locked_target_died() -> void:
+	# Enemy can stay in the scene (death animation/corpse), but lock-on should end.
+	disable_target_lock()
 
 
 func get_enemy_under_mouse() -> Node2D:
@@ -372,3 +417,41 @@ func die() -> void:
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Hitbox/CollisionShape2D.set_deferred("disabled", true)
 	animated_sprite_2d.play("dying")
+
+
+func add_beer(amount: int) -> void:
+	if amount <= 0:
+		return
+	beer_count += amount
+	beer_count_changed.emit(beer_count)
+
+
+func try_use_beer() -> void:
+	if beer_count <= 0:
+		return
+	if _beer_effect_active:
+		return
+
+	beer_count = max(beer_count - 1, 0)
+	beer_count_changed.emit(beer_count)
+
+	_beer_effect_active = true
+	_beer_effect_left = BEER_EFFECT_DURATION
+	_move_speed_multiplier = BEER_SPEED_MULTIPLIER
+	beer_effect_active_changed.emit(true)
+	beer_effect_time_left_changed.emit(_beer_effect_left)
+
+
+func _process_beer_effect(delta: float) -> void:
+	if not _beer_effect_active:
+		return
+
+	_beer_effect_left = max(_beer_effect_left - delta, 0.0)
+	beer_effect_time_left_changed.emit(_beer_effect_left)
+	if _beer_effect_left > 0.0:
+		return
+
+	_beer_effect_active = false
+	_move_speed_multiplier = 1.0
+	beer_effect_active_changed.emit(false)
+	beer_effect_time_left_changed.emit(0.0)

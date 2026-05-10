@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://scenes/water_tank_ui.tscn" id="4_watertank"]
 [ext_resource type="PackedScene" path="res://scenes/player_health_ui.tscn" id="5_healthui"]
 [ext_resource type="PackedScene" uid="uid://door0001abcd" path="res://scenes/door.tscn" id="6_door"]
+[ext_resource type="PackedScene" path="res://scenes/beer_pickup.tscn" id="11_beer_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/beer_effect_ui.tscn" id="12_beer_ui"]
 [ext_resource type="Texture2D" path="res://assets/images/couch.png" id="7_couch"]
 [ext_resource type="Texture2D" path="res://assets/images/floor_tiles.png" id="8_floor"]
 [ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="9_theme"]
@@ -293,6 +295,12 @@ offset_right = 1340.0
 offset_bottom = 650.0
 color = Color(0.58, 0.22, 0.22, 1)
 
+; ===== PICKUPS =====
+[node name="Pickups" type="Node2D" parent="."]
+
+[node name="BeerPickup" parent="Pickups" instance=ExtResource("11_beer_pickup")]
+position = Vector2(360, 420)
+
 ; ===== DOOR (exit) =====
 [node name="Doors" type="Node2D" parent="."]
 
@@ -347,6 +355,8 @@ position = Vector2(250, 250)
 
 ; ===== UI =====
 [node name="UI" type="CanvasLayer" parent="."]
+
+[node name="BeerEffectUI" parent="UI" instance=ExtResource("12_beer_ui")]
 
 [node name="PlayerHealthUI" parent="UI" instance=ExtResource("5_healthui")]
 
@@ -521,3 +531,6 @@ text = "Menu główne"
 [connection signal="shot_mode_changed" from="Player" to="UI/WaterTankUI" method="_on_player_shot_mode_changed"]
 [connection signal="acid_status_changed" from="Player" to="UI/WaterTankUI" method="_on_player_acid_status_changed"]
 [connection signal="health_changed" from="Player" to="UI/PlayerHealthUI" method="_on_player_health_changed"]
+[connection signal="beer_count_changed" from="Player" to="UI/BeerEffectUI" method="_on_player_beer_count_changed"]
+[connection signal="beer_effect_active_changed" from="Player" to="UI/BeerEffectUI" method="_on_player_beer_effect_active_changed"]
+[connection signal="beer_effect_time_left_changed" from="Player" to="UI/BeerEffectUI" method="_on_player_beer_effect_time_left_changed"]
