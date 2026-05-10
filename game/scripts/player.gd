@@ -12,14 +12,10 @@ const ACID_SHOT_COST: int = 10
 const ACID_REFILL_COOLDOWN: float = 7.0
 const MAX_HEALTH: int = 90
 
+const PIXEL_THEME: Theme = preload("res://assets/themes/pixel_theme.tres")
+
 const BEER_SPEED_MULTIPLIER: float = 1.5
 const BEER_EFFECT_DURATION: float = 10.0
-
-# Tank regeneration: starts after this many seconds without taking damage,
-# then refills at the given rates (per second).
-const REGEN_DELAY: float = 2.5
-const WATER_REGEN_PER_SEC: float = 18.0
-const ACID_REGEN_PER_SEC: float = 12.0
 
 enum ShotMode { WATER, ACID }
 
@@ -53,11 +49,8 @@ var _beer_effect_left: float = 0.0
 var _beer_effect_active: bool = false
 var _move_speed_multiplier: float = 1.0
 
-# Time since the player last took damage. Tanks regen only after REGEN_DELAY.
-var time_since_damage: float = 999.0
-var _water_acc: float = 0.0
-var _acid_acc: float = 0.0
-var _water_depleted: bool = false
+var _sink_fill_left: float = 0.0
+var _sink_fill_label: Label = null
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
@@ -68,7 +61,22 @@ var _water_depleted: bool = false
 func _ready() -> void:
 	# Initialise hitbox offset
 	hitbox_offset = hitbox.position
+	_setup_sink_fill_label()
 	call_deferred("emit_initial_ui_state")
+
+
+func _setup_sink_fill_label() -> void:
+	_sink_fill_label = Label.new()
+	_sink_fill_label.theme = PIXEL_THEME
+	_sink_fill_label.visible = false
+	_sink_fill_label.text = ""
+	_sink_fill_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_sink_fill_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sink_fill_label.custom_minimum_size = Vector2(260, 28)
+	# Position in world space above the player.
+	_sink_fill_label.position = Vector2(-130, -150)
+	_sink_fill_label.z_index = 50
+	add_child(_sink_fill_label)
 
 
 func emit_initial_ui_state() -> void:
@@ -82,6 +90,7 @@ func emit_initial_ui_state() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	_process_sink_fill_feedback(_delta)
 	_process_beer_effect(_delta)
 
 	if current_health <= 0:
@@ -100,10 +109,6 @@ func _physics_process(_delta: float) -> void:
 
 	if shot_cooldown_left > 0.0:
 		shot_cooldown_left = max(shot_cooldown_left - _delta, 0.0)
-
-	# Tank regeneration when not recently damaged
-	time_since_damage += _delta
-	_process_tank_regen(_delta)
 
 	if is_acid_cooling_down:
 		acid_cooldown_left = max(acid_cooldown_left - _delta, 0.0)
@@ -238,8 +243,6 @@ func spawn_projectile(direction: Vector2) -> void:
 func consume_water(amount: int) -> void:
 	current_water_capacity = max(current_water_capacity - amount, 0)
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
-	if current_water_capacity <= 0:
-		_water_depleted = true
 
 
 func consume_acid(amount: int) -> void:
@@ -255,6 +258,46 @@ func consume_acid(amount: int) -> void:
 func refill_water_tank() -> void:
 	current_water_capacity = MAX_WATER_CAPACITY
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+
+
+func refill_water(amount: int) -> bool:
+	if amount <= 0:
+		return false
+
+	var before := current_water_capacity
+	current_water_capacity = clampi(current_water_capacity + amount, 0, MAX_WATER_CAPACITY)
+	if current_water_capacity == before:
+		return false
+
+	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+	return true
+
+
+func start_sink_fill_feedback(duration: float) -> void:
+	_sink_fill_left = maxf(duration, 0.0)
+	_update_sink_fill_label()
+	if _sink_fill_label != null:
+		_sink_fill_label.visible = _sink_fill_left > 0.0
+
+
+func _process_sink_fill_feedback(delta: float) -> void:
+	if _sink_fill_left <= 0.0:
+		return
+
+	_sink_fill_left = maxf(_sink_fill_left - delta, 0.0)
+	_update_sink_fill_label()
+	if _sink_fill_left <= 0.0 and _sink_fill_label != null:
+		_sink_fill_label.visible = false
+
+
+func _update_sink_fill_label() -> void:
+	if _sink_fill_label == null:
+		return
+	if _sink_fill_left <= 0.0:
+		_sink_fill_label.text = ""
+		return
+
+	_sink_fill_label.text = "Napełnianie: %.1fs" % _sink_fill_left
 
 
 func start_acid_cooldown() -> void:
@@ -377,32 +420,9 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		body.take_damage(strenght, position)
 
 
-func _process_tank_regen(delta: float) -> void:
-	if time_since_damage < REGEN_DELAY:
-		_water_acc = 0.0
-		return
-
-	# Water tank regen only when it was fully depleted.
-	# Keeps regenerating until it reaches max; then stops.
-	if _water_depleted:
-		_water_acc += WATER_REGEN_PER_SEC * delta
-		var water_add := int(_water_acc)
-		if water_add > 0:
-			_water_acc -= float(water_add)
-			current_water_capacity = min(current_water_capacity + water_add, MAX_WATER_CAPACITY)
-			water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
-			if current_water_capacity >= MAX_WATER_CAPACITY:
-				_water_depleted = false
-				_water_acc = 0.0
-	else:
-		_water_acc = 0.0
-
-
 func take_damage(damage: int) -> void:
 	if current_health <= 0:
 		return
-
-	time_since_damage = 0.0
 	current_health = max(current_health - damage, 0)
 	health_changed.emit(current_health, MAX_HEALTH)
 
