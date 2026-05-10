@@ -4,7 +4,6 @@ extends Node2D
 enum State { PLAY, COMPLETE, GAME_OVER }
 
 
-const TOTAL_PLANTS: int = 3
 const TOTAL_ENEMIES: int = 4
 
 
@@ -33,6 +32,9 @@ var plants_watered: int = 0
 var enemies_killed: int = 0
 var elapsed: float = 0.0
 
+var plants_to_rescue_total: int = 0
+var enemies_to_kill_total: int = 0
+
 var _tutorial_tween: Tween = null
 var _tutorial_queue: Array = []
 var _tutorial_playing: bool = false
@@ -43,10 +45,15 @@ func _ready() -> void:
 	completion_screen.visible = false
 	game_over_screen.visible = false
 
+	plants_to_rescue_total = $Plants.get_child_count()
+	enemies_to_kill_total = TOTAL_ENEMIES
+
 	# Connect plants
 	for plant in $Plants.get_children():
 		if plant.has_signal("plant_fully_watered"):
 			plant.plant_fully_watered.connect(_on_plant_watered)
+		if plant.has_signal("corrupted_into_enemy"):
+			plant.corrupted_into_enemy.connect(_on_plant_corrupted_into_enemy)
 
 	# Connect enemies
 	for enemy in $Enemies.get_children():
@@ -87,6 +94,21 @@ func _on_plant_watered() -> void:
 	_check_objectives()
 
 
+func _on_plant_corrupted_into_enemy(enemy: Node2D) -> void:
+	# Make sure we count the corrupted enemy kill.
+	if enemy != null and enemy.has_signal("died"):
+		var died_cb := Callable(self, "_on_enemy_died")
+		if not enemy.is_connected("died", died_cb):
+			enemy.connect("died", died_cb)
+
+	# A corrupted plant no longer needs rescuing, so reduce the objective total.
+	plants_to_rescue_total = maxi(plants_to_rescue_total - 1, 0)
+	# The corrupted plant becomes an extra enemy that must be defeated.
+	enemies_to_kill_total += 1
+	_update_labels()
+	_check_objectives()
+
+
 func _on_enemy_died() -> void:
 	enemies_killed += 1
 	_update_labels()
@@ -94,14 +116,14 @@ func _on_enemy_died() -> void:
 
 
 func _update_labels() -> void:
-	plants_label.text = "Rośliny podlane: %d / %d" % [plants_watered, TOTAL_PLANTS]
-	enemies_label.text = "Wrogowie pokonani: %d / %d" % [enemies_killed, TOTAL_ENEMIES]
+	plants_label.text = "Rośliny podlane: %d / %d" % [plants_watered, plants_to_rescue_total]
+	enemies_label.text = "Wrogowie pokonani: %d / %d" % [mini(enemies_killed, enemies_to_kill_total), enemies_to_kill_total]
 
 
 func _check_objectives() -> void:
 	if state != State.PLAY:
 		return
-	if plants_watered >= TOTAL_PLANTS and enemies_killed >= TOTAL_ENEMIES:
+	if plants_watered >= plants_to_rescue_total and enemies_killed >= enemies_to_kill_total:
 		door2.unlock()
 		_queue_tutorial("Wszystko uratowane!\nDrzwi po prawej są otwarte — ucieknij stąd", 5.0)
 

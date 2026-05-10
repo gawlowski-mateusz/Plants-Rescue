@@ -416,7 +416,9 @@ func update_hitbox_offset() -> void:
 
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	if is_attacking and body.name.begins_with("Slime"):
+	if not is_attacking:
+		return
+	if body != null and body.has_method("take_damage"):
 		body.take_damage(strenght, position)
 
 

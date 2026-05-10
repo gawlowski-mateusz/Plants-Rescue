@@ -5,10 +5,16 @@ class_name FriendlyPlant
 const MAX_WATER_LEVEL: int = 100
 const WATER_PER_SHOT: int = 20
 
+const DEFAULT_ENEMY_SCALE: Vector2 = Vector2(2.0, 2.0)
+
+@export var corrupted_enemy_scene: PackedScene = preload("res://scenes/slime.tscn")
+
 signal plant_fully_watered
+signal corrupted_into_enemy(enemy: Node2D)
 
 var water_level: int = 0
 var is_watered: bool = false
+var _is_corrupted: bool = false
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var bloomed_sprite: Sprite2D = $BloomedSprite
@@ -27,6 +33,8 @@ func _ready() -> void:
 func water(amount: int = WATER_PER_SHOT) -> void:
 	if is_watered:
 		return
+	if _is_corrupted:
+		return
 
 	water_level = clampi(water_level + amount, 0, MAX_WATER_LEVEL)
 	water_bar.update_water(water_level)
@@ -38,6 +46,50 @@ func water(amount: int = WATER_PER_SHOT) -> void:
 	if water_level >= MAX_WATER_LEVEL:
 		is_watered = true
 		_bloom()
+
+
+func take_damage(_damage: int, _attacker_position: Vector2) -> void:
+	# Friendly plants can be corrupted into enemies by acid or scissors.
+	if is_watered:
+		return
+	if _is_corrupted:
+		return
+	_corrupt_into_enemy()
+
+
+func _corrupt_into_enemy() -> void:
+	_is_corrupted = true
+	if corrupted_enemy_scene == null:
+		queue_free()
+		return
+
+	var enemy = corrupted_enemy_scene.instantiate()
+	if enemy == null:
+		queue_free()
+		return
+
+	var enemy_node := enemy as Node2D
+	if enemy_node != null:
+		enemy_node.global_position = global_position
+		enemy_node.scale = DEFAULT_ENEMY_SCALE
+
+	var scene_root := get_tree().current_scene
+	var enemies_container: Node = null
+	if scene_root != null:
+		enemies_container = scene_root.get_node_or_null("Enemies")
+
+	if enemies_container != null:
+		enemies_container.add_child(enemy)
+	else:
+		get_parent().add_child(enemy)
+
+	if enemy_node != null:
+		corrupted_into_enemy.emit(enemy_node)
+	else:
+		# Fallback, should not happen with current enemy scenes.
+		corrupted_into_enemy.emit(null)
+
+	queue_free()
 
 
 func _bloom() -> void:
