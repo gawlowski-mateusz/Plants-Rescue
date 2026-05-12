@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/images/enemies/Slime_Green.png" id="1_tex"]
+[ext_resource type="Script" path="res://scripts/boss_mushroom.gd" id="2_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/hit_enemy.mp3" id="3_hit"]
+[ext_resource type="PackedScene" path="res://scenes/health_bar.tscn" id="4_health"]
+
+[sub_resource type="AtlasTexture" id="AT_mush"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="RectangleShape2D" id="RS_body"]
+size = Vector2(22, 16)
+
+[sub_resource type="CircleShape2D" id="CS_sight"]
+radius = 420.0
+
+[sub_resource type="CircleShape2D" id="CS_gas"]
+radius = 160.0
+
+[node name="BossMushroom" type="CharacterBody2D"]
+collision_layer = 3
+collision_mask = 1
+script = ExtResource("2_script")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(4.0, 4.0)
+texture = SubResource("AT_mush")
+modulate = Color(0.85, 0.35, 1.0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RS_body")
+
+[node name="Sight" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sight"]
+shape = SubResource("CS_sight")
+
+[node name="GasArea" type="Area2D" parent="."]
+collision_mask = 1
+
+[node name="GasVisual" type="Polygon2D" parent="GasArea"]
+color = Color(0.6, 1.0, 0.6, 0.18)
+polygon = PackedVector2Array(160, 0, 113, 113, 0, 160, -113, 113, -160, 0, -113, -113, 0, -160, 113, -113)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GasArea"]
+shape = SubResource("CS_gas")
+
+[node name="TakeDamage" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_hit")
+pitch_scale = 1.4
+
+[node name="HealthBar" parent="." instance=ExtResource("4_health")]
+position = Vector2(-10, 16)

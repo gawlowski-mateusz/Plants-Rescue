@@ -11,7 +11,7 @@ Gry Komputerowe — Projekt, środa 9:15
   - [1.2. Gatunek](#12-gatunek)
   - [1.3. Odbiorcy](#13-odbiorcy)
   - [1.4. Platforma i wymagania sprzętowe](#14-platforma-i-wymagania-sprzętowe)
-  - [1.5. Monetyzacja (model biznesowy)](#15-monetyzacja-model-biznesowy)
+  - [1.5. Monetyzacja (model biznesowy)](#15-monetyzacja)
 - [2. Tematyka i osadzenie gry](#2-tematyka-i-osadzenie-gry)
   - [2.1. Lokacje — poziomy (pokoje)](#21-lokacje--poziomy-pokoje)
   - [2.2. Fabuła](#22-fabuła)
@@ -57,7 +57,7 @@ Gry Komputerowe — Projekt, środa 9:15
 
 ### 1.1. Tytuł
 
-**Plants Rescue**
+Plants Rescue
 
 Podtytuł: Water or Fight
 
@@ -150,6 +150,7 @@ Aktualnie w grze zaimplementowany jest jeden typ przeciwnika:
 - **Slime (Śluz)** — zmutowana roślina-potwór. HP: 100, prędkość: 100 px/s, obrażenia: 15 przy kontakcie (co 0,8 s). Posiada stany: idle, pościg (chase), atak kontaktowy (spine_attack), śmierć. Reaguje na obrażenia: czerwony flash + knockback. Nad głową wyświetla pasek HP.
 
 Planowani przeciwnicy (nie zaimplementowani):
+
 - Pnącze gniewu — szybkie, atakuje z dystansu
 - Grzybek halucynek — spowalniający gaz
 - Palma kokosowa — boss końcowy (fazy)
@@ -157,6 +158,7 @@ Planowani przeciwnicy (nie zaimplementowani):
 #### 2.3.4. Inteligencja NPC (AI przeciwników)
 
 Slime posiada trzy strefy detekcji:
+
 - **Sight** (strefa widzenia) — gdy gracz wejdzie w zasięg, Slime zaczyna go gonić
 - **AttackHitbox** (strefa ataku) — gdy gracz jest wystarczająco blisko, Slime zatrzymuje się i atakuje (animacja spine_attack, 15 dmg co 0,8 s)
 - Po śmierci — wyłączenie kolizji, animacja die, emisja sygnału `died`
@@ -236,17 +238,20 @@ Po kliknięciu PLAY gracz trafia do Pokoju 1 (Przedpokój). Na ekranie wyświetl
 #### Ekran Game Over
 
 Wyświetlany po śmierci gracza (HP = 0) z opóźnieniem 1,2 s. Przyciski:
+
 - **Spróbuj ponownie** — restart aktualnego pokoju
 - **Wróć do menu** — powrót do menu głównego
 
 #### Ekran ukończenia poziomu
 
 Wyświetlany po spełnieniu wszystkich celów i przejściu przez drzwi wyjściowe. Pokazuje czas przejścia (format MM:SS). Przycisk:
+
 - **Menu** — powrót do menu głównego
 
 #### System tutoriali (toasty)
 
 Komunikaty pojawiające się jako animowane panele (fade-in → wyświetlanie → fade-out). Kolejkowane — wyświetlają się jeden po drugim. Przykłady:
+
 - Przedpokój: „WASD — ruch", „Znajdź drzwi po prawej i wciśnij SPACJA lub E aby je otworzyć"
 - Salon: „LPM — strzelaj wodą / Podlej rośliny aby je uratować", „X — przełącz między wodą a kwasem / Kwas rani wrogów", „Prawy przycisk myszy — auto-celowanie w wroga pod kursorem", „Uratuj wszystkie 3 rośliny i pokonaj 4 zmutowane potwory"
 
@@ -286,22 +291,23 @@ Komunikaty pojawiające się jako animowane panele (fade-in → wyświetlanie �
 - Student run (kierunkowy)
 - Student attack (kierunkowy — nożyczki)
 - Student dying
-<img width="1536" height="1024" alt="student" src="https://github.com/user-attachments/assets/db01d58c-a2cd-4798-a4d6-3bf07c115617" />
+
+![student](https://github.com/user-attachments/assets/db01d58c-a2cd-4798-a4d6-3bf07c115617)
 
 #### Stany roślin
 
 - Rośliny przyjazne: stan suchy/blade (modulate wygaszony) → podlewana (stopniowe rozjaśnianie) → rozkwitnięta (osobny sprite z pulsacją)
 - Slime (przeciwnik): idle, attack (pościg), spine_attack (atak kontaktowy), die
-<img width="1536" height="1024" alt="rosliny" src="https://github.com/user-attachments/assets/d0ce3624-0ccc-4509-b101-5118cc8a0c1c" />
 
-
+![rosliny](https://github.com/user-attachments/assets/d0ce3624-0ccc-4509-b101-5118cc8a0c1c)
 
 #### Tła i obiekty
 
 - Pokój 1 — Przedpokój: proste tło z drzwiami po prawej, scroll/list na podłodze
 - Pokój 2 — Salon: kafle podłogowe, kanapa, papiery, rozbite doniczki, rośliny, wrogowie rozmieszczeni w pokoju
 - Meble jako niezależne obiekty z kolizjami (sofa, stolik)
-<img width="1536" height="1024" alt="pokoj" src="https://github.com/user-attachments/assets/34bfd26e-a813-4e92-8cbf-9283b25674db" />
+
+![pokoj](https://github.com/user-attachments/assets/34bfd26e-a813-4e92-8cbf-9283b25674db)
 
 #### UI
 
@@ -310,8 +316,8 @@ Komunikaty pojawiające się jako animowane panele (fade-in → wyświetlanie �
 - Paski HP wrogów i nawodnienia roślin (region-based Sprite2D)
 - Pixel font: „PixelifySans" + „Press Start 2P" (Google Fonts, open license)
   ![czcionkajpg](https://github.com/user-attachments/assets/0e51ceb9-c0ea-454c-ab2c-d4d23ebf7171)
-<img width="1600" height="840" alt="czcionka3" src="https://github.com/user-attachments/assets/7c24dfaf-afdd-4a02-a1c6-efd745b77e00" />
 
+![czcionka3](https://github.com/user-attachments/assets/7c24dfaf-afdd-4a02-a1c6-efd745b77e00)
 
 #### Narzędzia graficzne
 
@@ -360,4 +366,4 @@ Celem prototypu jest weryfikacja głównych mechanik gry w środowisku Godot 4.6
 - 🔲 Muzyka tła (BGM)
 - 🔲 Dodatkowe efekty dźwiękowe
 
-**Plants Rescue — GDD v2.0**
+Plants Rescue — GDD v2.0

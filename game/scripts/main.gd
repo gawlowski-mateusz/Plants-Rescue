@@ -123,10 +123,18 @@ func _play_next_tutorial() -> void:
 # ---------------------------------------------------------------
 
 func _restart_scene() -> void:
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("restore_level_start_stats"):
+		gs.call("restore_level_start_stats")
+	elif gs != null and gs.has_method("restore_level_start_health"):
+		gs.call("restore_level_start_health")
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
 func _return_to_menu() -> void:
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("reset_run"):
+		gs.reset_run()
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

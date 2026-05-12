@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/papers.png" id="11_papers"]
 [ext_resource type="Texture2D" path="res://assets/images/scroll.png" id="12_scroll"]
 [ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="13_theme"]
+[ext_resource type="PackedScene" path="res://scenes/medkit_pickup.tscn" id="14_medkit"]
 
 [sub_resource type="RectangleShape2D" id="RS_couch"]
 size = Vector2(80, 44)
@@ -136,6 +137,11 @@ offset_top = 480.0
 offset_right = 360.0
 offset_bottom = 540.0
 color = Color(0.45, 0.25, 0.18, 1)
+
+[node name="Pickups" type="Node2D" parent="."]
+
+[node name="Medkit" parent="Pickups" instance=ExtResource("14_medkit")]
+position = Vector2(420, 360)
 
 ; ===== DOOR TO LIVING ROOM =====
 [node name="Doors" type="Node2D" parent="."]

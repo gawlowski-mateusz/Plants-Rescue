@@ -33,15 +33,9 @@ func _on_body_exited(body: Node2D) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _player_in_range or _player == null:
 		return
-
-	if not (event is InputEventKey):
+	if event is InputEventKey and (event as InputEventKey).echo:
 		return
-
-	var key_event := event as InputEventKey
-	if not key_event.pressed or key_event.echo:
-		return
-
-	if key_event.physical_keycode != KEY_SPACE:
+	if not event.is_action_pressed("interact"):
 		return
 
 	if _player.has_method("add_beer"):

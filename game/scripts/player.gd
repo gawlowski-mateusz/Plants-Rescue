@@ -10,7 +10,8 @@ const WATER_SHOT_COST: int = 10
 const MAX_ACID_CAPACITY: int = 100
 const ACID_SHOT_COST: int = 10
 const ACID_REFILL_COOLDOWN: float = 7.0
-const MAX_HEALTH: int = 90
+const HEALTH_PER_HEART: int = 30
+const BASE_MAX_HEALTH: int = 3 * HEALTH_PER_HEART
 
 const PIXEL_THEME: Theme = preload("res://assets/themes/pixel_theme.tres")
 
@@ -41,26 +42,34 @@ var current_water_capacity: int = MAX_WATER_CAPACITY
 var current_acid_capacity: int = MAX_ACID_CAPACITY
 var is_acid_cooling_down: bool = false
 var acid_cooldown_left: float = 0.0
-var current_health: int = MAX_HEALTH
+var max_health: int = BASE_MAX_HEALTH
+var current_health: int = BASE_MAX_HEALTH
 var input_locked: bool = false
 
 var beer_count: int = 0
 var _beer_effect_left: float = 0.0
 var _beer_effect_active: bool = false
-var _move_speed_multiplier: float = 1.0
+var _beer_speed_multiplier: float = 1.0
+var _slow_speed_multiplier: float = 1.0
 
 var _sink_fill_left: float = 0.0
 var _sink_fill_label: Label = null
+
+var _base_hitbox_scale: Vector2 = Vector2.ONE
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var swing_scissors: AudioStreamPlayer2D = $SwingScissors
 @onready var hitbox: Area2D = $Hitbox
+@onready var _hitbox_collision_shape: CollisionShape2D = $Hitbox/CollisionShape2D
 
 
 func _ready() -> void:
 	# Initialise hitbox offset
 	hitbox_offset = hitbox.position
+	_base_hitbox_scale = _hitbox_collision_shape.scale if _hitbox_collision_shape != null else Vector2.ONE
+	_load_persistent_state()
+	_apply_persistent_bonuses()
 	_setup_sink_fill_label()
 	call_deferred("emit_initial_ui_state")
 
@@ -83,7 +92,7 @@ func emit_initial_ui_state() -> void:
 	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
 	shot_mode_changed.emit(int(shot_mode))
 	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, is_acid_cooling_down, acid_cooldown_left)
-	health_changed.emit(current_health, MAX_HEALTH)
+	health_changed.emit(current_health, max_health)
 	beer_count_changed.emit(beer_count)
 	beer_effect_active_changed.emit(false)
 	beer_effect_time_left_changed.emit(0.0)
@@ -155,11 +164,23 @@ func process_movement() -> void:
 	var direction := Input.get_vector("left", "right", "up", "down")
 	
 	if direction != Vector2.ZERO:
-		velocity = direction * SPEED * _move_speed_multiplier
+		velocity = direction * SPEED * _get_speed_multiplier()
 		last_direction = direction
 		update_hitbox_offset()
 	else:
 		velocity = Vector2.ZERO
+
+
+func _get_speed_multiplier() -> float:
+	return _beer_speed_multiplier * _slow_speed_multiplier
+
+
+func set_slow_multiplier(multiplier: float) -> void:
+	_slow_speed_multiplier = clampf(multiplier, 0.1, 1.0)
+
+
+func clear_slow_multiplier() -> void:
+	_slow_speed_multiplier = 1.0
 		
 
 func process_animaion() -> void:
@@ -426,7 +447,8 @@ func take_damage(damage: int) -> void:
 	if current_health <= 0:
 		return
 	current_health = max(current_health - damage, 0)
-	health_changed.emit(current_health, MAX_HEALTH)
+	health_changed.emit(current_health, max_health)
+	_save_persistent_health()
 
 	if current_health <= 0:
 		die()
@@ -446,6 +468,7 @@ func add_beer(amount: int) -> void:
 		return
 	beer_count += amount
 	beer_count_changed.emit(beer_count)
+	_save_persistent_beer()
 
 
 func try_use_beer() -> void:
@@ -456,10 +479,11 @@ func try_use_beer() -> void:
 
 	beer_count = max(beer_count - 1, 0)
 	beer_count_changed.emit(beer_count)
+	_save_persistent_beer()
 
 	_beer_effect_active = true
 	_beer_effect_left = BEER_EFFECT_DURATION
-	_move_speed_multiplier = BEER_SPEED_MULTIPLIER
+	_beer_speed_multiplier = BEER_SPEED_MULTIPLIER
 	beer_effect_active_changed.emit(true)
 	beer_effect_time_left_changed.emit(_beer_effect_left)
 
@@ -474,6 +498,91 @@ func _process_beer_effect(delta: float) -> void:
 		return
 
 	_beer_effect_active = false
-	_move_speed_multiplier = 1.0
+	_beer_speed_multiplier = 1.0
 	beer_effect_active_changed.emit(false)
 	beer_effect_time_left_changed.emit(0.0)
+
+
+func heal(amount: int) -> bool:
+	if amount <= 0:
+		return false
+	if current_health <= 0:
+		return false
+
+	var before := current_health
+	current_health = clampi(current_health + amount, 0, max_health)
+	if current_health == before:
+		return false
+
+	health_changed.emit(current_health, max_health)
+	_save_persistent_health()
+	return true
+
+
+func heal_one_heart() -> bool:
+	return heal(HEALTH_PER_HEART)
+
+
+func sync_from_game_state() -> void:
+	var gs := _get_game_state()
+	if gs == null:
+		return
+
+	beer_count = gs.beer_count
+	max_health = maxi(gs.max_health, 1)
+	current_health = clampi(gs.current_health, 0, max_health)
+
+	beer_count_changed.emit(beer_count)
+	health_changed.emit(current_health, max_health)
+	_apply_persistent_bonuses()
+
+
+func apply_scissors_range_multiplier(multiplier: float) -> void:
+	if _hitbox_collision_shape == null:
+		return
+
+	_hitbox_collision_shape.scale = _base_hitbox_scale * multiplier
+
+
+func _get_game_state() -> Node:
+	return get_node_or_null("/root/GameState")
+
+
+func _load_persistent_state() -> void:
+	var gs := _get_game_state()
+	if gs == null:
+		return
+
+	beer_count = gs.beer_count
+	max_health = maxi(gs.max_health, 1)
+	current_health = clampi(gs.current_health, 0, max_health)
+
+	if gs.has_method("consume_restart_state"):
+		var restart_data: Dictionary = gs.call("consume_restart_state")
+		if restart_data.has("water"):
+			current_water_capacity = clampi(int(restart_data["water"]), 0, MAX_WATER_CAPACITY)
+		if restart_data.has("acid"):
+			current_acid_capacity = clampi(int(restart_data["acid"]), 0, MAX_ACID_CAPACITY)
+			is_acid_cooling_down = false
+			acid_cooldown_left = 0.0
+
+
+func _save_persistent_health() -> void:
+	var gs := _get_game_state()
+	if gs == null:
+		return
+	gs.set_health(current_health, max_health)
+
+
+func _save_persistent_beer() -> void:
+	var gs := _get_game_state()
+	if gs == null:
+		return
+	gs.set_beer_count(beer_count)
+
+
+func _apply_persistent_bonuses() -> void:
+	var gs := _get_game_state()
+	if gs == null:
+		return
+	apply_scissors_range_multiplier(gs.get_scissors_range_multiplier())

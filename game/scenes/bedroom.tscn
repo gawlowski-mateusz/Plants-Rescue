@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d4jdm8l0a68q3"]
+[gd_scene format=3 uid="uid://b3dr00mrm0a2c"]
 
 [ext_resource type="PackedScene" uid="uid://dftrpkfy22rxb" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/slime.tscn" id="2_slime"]
@@ -12,8 +12,8 @@
 [ext_resource type="Script" uid="uid://btq7ubpeqlpkw" path="res://scripts/living_room.gd" id="10_lr"]
 [ext_resource type="PackedScene" path="res://scenes/beer_effect_ui.tscn" id="12_beer_ui"]
 [ext_resource type="PackedScene" path="res://scenes/water_bottles_pack.tscn" id="13_sink"]
+[ext_resource type="PackedScene" path="res://scenes/boss_mushroom.tscn" id="15_boss_mushroom"]
 [ext_resource type="PackedScene" path="res://scenes/medkit_pickup.tscn" id="14_medkit"]
-[ext_resource type="Script" path="res://scripts/fridge.gd" id="15_fridge"]
 
 [sub_resource type="RectangleShape2D" id="RS_wall_horiz"]
 size = Vector2(2400, 100)
@@ -29,9 +29,6 @@ size = Vector2(160, 80)
 
 [sub_resource type="RectangleShape2D" id="RS_bookshelf"]
 size = Vector2(80, 200)
-
-[sub_resource type="RectangleShape2D" id="RS_fridge_interact"]
-size = Vector2(160, 280)
 
 [sub_resource type="RectangleShape2D" id="RS_tv"]
 size = Vector2(180, 60)
@@ -54,14 +51,15 @@ border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.85, 0.7, 0.3, 1)
 
-[node name="LivingRoom" type="Node2D" unique_id=442478241]
+[node name="Bedroom" type="Node2D" unique_id=442478241]
 script = ExtResource("10_lr")
-next_scene_path = "res://scenes/kitchen.tscn"
+next_scene_path = "res://scenes/balcony.tscn"
+show_onboarding_tutorials = false
 
 [node name="Floor" type="ColorRect" parent="." unique_id=2080300858]
 offset_right = 2400.0
 offset_bottom = 1200.0
-color = Color(0.7, 0.62, 0.48, 1)
+color = Color(0.5, 0.46, 0.58, 1)
 
 [node name="FloorPattern" type="Sprite2D" parent="." unique_id=608009865]
 modulate = Color(1, 1, 1, 0.25)
@@ -141,6 +139,54 @@ position = Vector2(2345, 1010)
 shape = SubResource("RS_wall_vert")
 
 [node name="Furniture" type="Node2D" parent="." unique_id=1612589656]
+
+[node name="DividerVert1" type="StaticBody2D" parent="Furniture"]
+position = Vector2(1120, 600)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Visual" type="ColorRect" parent="Furniture/DividerVert1"]
+offset_left = -40.0
+offset_top = -420.0
+offset_right = 40.0
+offset_bottom = 420.0
+color = Color(0.22, 0.18, 0.26, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/DividerVert1"]
+scale = Vector2(0.75, 0.7)
+shape = SubResource("RS_wall_vert")
+
+[node name="DividerVert2" type="StaticBody2D" parent="Furniture"]
+position = Vector2(1320, 600)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Visual" type="ColorRect" parent="Furniture/DividerVert2"]
+offset_left = -40.0
+offset_top = -420.0
+offset_right = 40.0
+offset_bottom = 420.0
+color = Color(0.22, 0.18, 0.26, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/DividerVert2"]
+scale = Vector2(0.75, 0.7)
+shape = SubResource("RS_wall_vert")
+
+[node name="DividerHoriz" type="StaticBody2D" parent="Furniture"]
+position = Vector2(1220, 320)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Visual" type="ColorRect" parent="Furniture/DividerHoriz"]
+offset_left = -420.0
+offset_top = -18.0
+offset_right = 420.0
+offset_bottom = 18.0
+color = Color(0.22, 0.18, 0.26, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/DividerHoriz"]
+scale = Vector2(0.35, 0.35)
+shape = SubResource("RS_wall_horiz")
 
 [node name="Couch1" type="StaticBody2D" parent="Furniture" unique_id=1838081435]
 position = Vector2(520, 340)
@@ -294,57 +340,10 @@ offset_right = 1340.0
 offset_bottom = 650.0
 color = Color(0.58, 0.22, 0.22, 1)
 
-[node name="Fridge" type="StaticBody2D" parent="Furniture"]
-position = Vector2(300, 780)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Body" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = -44.0
-offset_top = -98.0
-offset_right = 44.0
-offset_bottom = 98.0
-color = Color(0.88, 0.88, 0.92, 1)
-
-[node name="Split" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = -44.0
-offset_top = -2.0
-offset_right = 44.0
-offset_bottom = 2.0
-color = Color(0.65, 0.65, 0.72, 1)
-
-[node name="HandleTop" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = 28.0
-offset_top = -78.0
-offset_right = 34.0
-offset_bottom = -38.0
-color = Color(0.55, 0.55, 0.6, 1)
-
-[node name="HandleBot" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = 28.0
-offset_top = 18.0
-offset_right = 34.0
-offset_bottom = 78.0
-color = Color(0.55, 0.55, 0.6, 1)
-
-[node name="BeerSpawnPoint" type="Node2D" parent="Furniture/Fridge"]
-position = Vector2(0, 140)
-
-[node name="FridgeInteract" type="Area2D" parent="Furniture/Fridge"]
-collision_layer = 0
-collision_mask = 1
-script = ExtResource("15_fridge")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge/FridgeInteract"]
-shape = SubResource("RS_fridge_interact")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge"]
-shape = SubResource("RS_bookshelf")
-
 [node name="Pickups" type="Node2D" parent="." unique_id=1333128997]
 
 [node name="Medkit" parent="Pickups" instance=ExtResource("14_medkit")]
-position = Vector2(1220, 980)
+position = Vector2(1200, 980)
 
 [node name="Doors" type="Node2D" parent="." unique_id=859804174]
 
@@ -364,18 +363,29 @@ shape = SubResource("RS_finish")
 [node name="Slime1" parent="Enemies" unique_id=1889636774 instance=ExtResource("2_slime")]
 position = Vector2(850, 700)
 scale = Vector2(2, 2)
+move_speed = 140.0
+attack_damage = 20
 
 [node name="Slime2" parent="Enemies" unique_id=768106268 instance=ExtResource("2_slime")]
 position = Vector2(1450, 880)
 scale = Vector2(2, 2)
+move_speed = 140.0
+attack_damage = 20
 
 [node name="Slime3" parent="Enemies" unique_id=1724892630 instance=ExtResource("2_slime")]
 position = Vector2(1700, 300)
 scale = Vector2(2, 2)
+move_speed = 140.0
+attack_damage = 20
 
 [node name="Slime4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_slime")]
 position = Vector2(2050, 950)
 scale = Vector2(2, 2)
+move_speed = 140.0
+attack_damage = 20
+
+[node name="BossMushroom" parent="Enemies" instance=ExtResource("15_boss_mushroom")]
+position = Vector2(1240, 760)
 
 [node name="Plants" type="Node2D" parent="." unique_id=1947606980]
 

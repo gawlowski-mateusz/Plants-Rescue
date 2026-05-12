@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\mateu\\\\Desktop\\\\Studies\\\\Semestr-8\\\\Gry komputerowe\\\\Plants-Rescue\\\\game\" -Recurse -Filter \"*.gd\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
+    ]
+  }
+}

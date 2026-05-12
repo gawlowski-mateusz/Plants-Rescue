@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d4jdm8l0a68q3"]
+[gd_scene format=3 uid="uid://b4lc0nyrm0a3d"]
 
 [ext_resource type="PackedScene" uid="uid://dftrpkfy22rxb" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/slime.tscn" id="2_slime"]
@@ -12,8 +12,8 @@
 [ext_resource type="Script" uid="uid://btq7ubpeqlpkw" path="res://scripts/living_room.gd" id="10_lr"]
 [ext_resource type="PackedScene" path="res://scenes/beer_effect_ui.tscn" id="12_beer_ui"]
 [ext_resource type="PackedScene" path="res://scenes/water_bottles_pack.tscn" id="13_sink"]
+[ext_resource type="PackedScene" path="res://scenes/boss_palm.tscn" id="16_boss_palm"]
 [ext_resource type="PackedScene" path="res://scenes/medkit_pickup.tscn" id="14_medkit"]
-[ext_resource type="Script" path="res://scripts/fridge.gd" id="15_fridge"]
 
 [sub_resource type="RectangleShape2D" id="RS_wall_horiz"]
 size = Vector2(2400, 100)
@@ -30,14 +30,23 @@ size = Vector2(160, 80)
 [sub_resource type="RectangleShape2D" id="RS_bookshelf"]
 size = Vector2(80, 200)
 
-[sub_resource type="RectangleShape2D" id="RS_fridge_interact"]
-size = Vector2(160, 280)
-
 [sub_resource type="RectangleShape2D" id="RS_tv"]
 size = Vector2(180, 60)
 
 [sub_resource type="RectangleShape2D" id="RS_dining"]
 size = Vector2(140, 100)
+
+[sub_resource type="RectangleShape2D" id="RS_gaming_desk"]
+size = Vector2(420, 90)
+
+[sub_resource type="RectangleShape2D" id="RS_bed"]
+size = Vector2(220, 140)
+
+[sub_resource type="RectangleShape2D" id="RS_chair"]
+size = Vector2(60, 60)
+
+[sub_resource type="RectangleShape2D" id="RS_pctower"]
+size = Vector2(44, 100)
 
 [sub_resource type="RectangleShape2D" id="RS_finish"]
 size = Vector2(120, 120)
@@ -54,14 +63,15 @@ border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.85, 0.7, 0.3, 1)
 
-[node name="LivingRoom" type="Node2D" unique_id=442478241]
+[node name="GamingRoom" type="Node2D" unique_id=442478241]
 script = ExtResource("10_lr")
-next_scene_path = "res://scenes/kitchen.tscn"
+next_scene_path = ""
+show_onboarding_tutorials = false
 
 [node name="Floor" type="ColorRect" parent="." unique_id=2080300858]
 offset_right = 2400.0
 offset_bottom = 1200.0
-color = Color(0.7, 0.62, 0.48, 1)
+color = Color(0.18, 0.16, 0.22, 1)
 
 [node name="FloorPattern" type="Sprite2D" parent="." unique_id=608009865]
 modulate = Color(1, 1, 1, 0.25)
@@ -143,7 +153,7 @@ shape = SubResource("RS_wall_vert")
 [node name="Furniture" type="Node2D" parent="." unique_id=1612589656]
 
 [node name="Couch1" type="StaticBody2D" parent="Furniture" unique_id=1838081435]
-position = Vector2(520, 340)
+position = Vector2(540, 480)
 collision_layer = 3
 collision_mask = 0
 
@@ -155,7 +165,7 @@ texture = ExtResource("7_couch")
 shape = SubResource("RS_couch")
 
 [node name="Couch2" type="StaticBody2D" parent="Furniture" unique_id=2116914984]
-position = Vector2(1700, 820)
+position = Vector2(1480, 620)
 collision_layer = 3
 collision_mask = 0
 
@@ -256,95 +266,418 @@ offset_left = -66.0
 offset_top = -18.0
 offset_right = 66.0
 offset_bottom = 14.0
-color = Color(0.25, 0.45, 0.7, 0.55)
+color = Color(0.55, 0.30, 0.85, 0.55)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/TVCabinet" unique_id=2013621311]
 shape = SubResource("RS_tv")
 
-[node name="DiningTable" type="StaticBody2D" parent="Furniture" unique_id=1391777374]
-position = Vector2(1900, 400)
+[node name="GamingDesk" type="StaticBody2D" parent="Furniture" unique_id=1391777374]
+position = Vector2(900, 230)
 collision_layer = 3
 collision_mask = 0
 
-[node name="Top" type="ColorRect" parent="Furniture/DiningTable" unique_id=1314339215]
-offset_left = -70.0
+[node name="Top" type="ColorRect" parent="Furniture/GamingDesk" unique_id=1314339215]
+offset_left = -210.0
+offset_top = -45.0
+offset_right = 210.0
+offset_bottom = 45.0
+color = Color(0.10, 0.10, 0.12, 1)
+
+[node name="Inner" type="ColorRect" parent="Furniture/GamingDesk" unique_id=1595942012]
+offset_left = -204.0
+offset_top = -39.0
+offset_right = 204.0
+offset_bottom = 39.0
+color = Color(0.15, 0.15, 0.18, 1)
+
+[node name="MonitorStand" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -16.0
+offset_top = -52.0
+offset_right = 16.0
+offset_bottom = -42.0
+color = Color(0.08, 0.08, 0.1, 1)
+
+[node name="MonitorFrame" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -100.0
+offset_top = -135.0
+offset_right = 100.0
+offset_bottom = -50.0
+color = Color(0.05, 0.05, 0.06, 1)
+
+[node name="MonitorScreen" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -92.0
+offset_top = -128.0
+offset_right = 92.0
+offset_bottom = -56.0
+color = Color(0.06, 0.10, 0.20, 1)
+
+[node name="MonitorGlow" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -90.0
+offset_top = -126.0
+offset_right = 90.0
+offset_bottom = -58.0
+color = Color(0.55, 0.30, 0.85, 0.45)
+
+[node name="MonitorScanline" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -86.0
+offset_top = -100.0
+offset_right = 86.0
+offset_bottom = -96.0
+color = Color(0.95, 0.55, 1.0, 0.50)
+
+[node name="Keyboard" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -75.0
+offset_top = 10.0
+offset_right = 75.0
+offset_bottom = 30.0
+color = Color(0.08, 0.08, 0.10, 1)
+
+[node name="KeyboardKeys" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -72.0
+offset_top = 13.0
+offset_right = 72.0
+offset_bottom = 27.0
+color = Color(0.18, 0.22, 0.30, 1)
+
+[node name="KeyboardLED" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = -72.0
+offset_top = 26.0
+offset_right = 72.0
+offset_bottom = 28.0
+color = Color(0.95, 0.30, 0.50, 1)
+
+[node name="Mouse" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = 95.0
+offset_top = 12.0
+offset_right = 120.0
+offset_bottom = 35.0
+color = Color(0.10, 0.10, 0.12, 1)
+
+[node name="MousePad" type="ColorRect" parent="Furniture/GamingDesk"]
+offset_left = 60.0
+offset_top = 6.0
+offset_right = 165.0
+offset_bottom = 40.0
+color = Color(0.18, 0.10, 0.25, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/GamingDesk" unique_id=1045744912]
+shape = SubResource("RS_gaming_desk")
+
+[node name="PCTower" type="StaticBody2D" parent="Furniture"]
+position = Vector2(1180, 270)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Body" type="ColorRect" parent="Furniture/PCTower"]
+offset_left = -22.0
 offset_top = -50.0
-offset_right = 70.0
+offset_right = 22.0
 offset_bottom = 50.0
-color = Color(0.5, 0.3, 0.15, 1)
+color = Color(0.07, 0.07, 0.09, 1)
 
-[node name="Inner" type="ColorRect" parent="Furniture/DiningTable" unique_id=1595942012]
-offset_left = -64.0
-offset_top = -44.0
-offset_right = 64.0
-offset_bottom = 44.0
-color = Color(0.65, 0.42, 0.2, 1)
+[node name="SidePanel" type="ColorRect" parent="Furniture/PCTower"]
+offset_left = -18.0
+offset_top = -42.0
+offset_right = 18.0
+offset_bottom = 22.0
+color = Color(0.05, 0.10, 0.18, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/DiningTable" unique_id=1045744912]
-shape = SubResource("RS_dining")
+[node name="RGBStrip" type="ColorRect" parent="Furniture/PCTower"]
+offset_left = -16.0
+offset_top = -40.0
+offset_right = -10.0
+offset_bottom = 20.0
+color = Color(0.35, 0.85, 1.0, 0.85)
+
+[node name="Fan" type="ColorRect" parent="Furniture/PCTower"]
+offset_left = -6.0
+offset_top = -8.0
+offset_right = 14.0
+offset_bottom = 12.0
+color = Color(0.95, 0.30, 0.85, 0.80)
+
+[node name="PowerLED" type="ColorRect" parent="Furniture/PCTower"]
+offset_left = -4.0
+offset_top = 30.0
+offset_right = 4.0
+offset_bottom = 36.0
+color = Color(0.5, 1.0, 0.4, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/PCTower"]
+shape = SubResource("RS_pctower")
+
+[node name="GamingChair" type="StaticBody2D" parent="Furniture"]
+position = Vector2(900, 360)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Back" type="ColorRect" parent="Furniture/GamingChair"]
+offset_left = -28.0
+offset_top = -30.0
+offset_right = 28.0
+offset_bottom = 10.0
+color = Color(0.10, 0.10, 0.10, 1)
+
+[node name="BackInner" type="ColorRect" parent="Furniture/GamingChair"]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 6.0
+color = Color(0.65, 0.10, 0.20, 1)
+
+[node name="Seat" type="ColorRect" parent="Furniture/GamingChair"]
+offset_left = -26.0
+offset_top = 6.0
+offset_right = 26.0
+offset_bottom = 26.0
+color = Color(0.10, 0.10, 0.10, 1)
+
+[node name="SeatTrim" type="ColorRect" parent="Furniture/GamingChair"]
+offset_left = -22.0
+offset_top = 8.0
+offset_right = 22.0
+offset_bottom = 22.0
+color = Color(0.65, 0.10, 0.20, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/GamingChair"]
+shape = SubResource("RS_chair")
+
+[node name="Bed" type="StaticBody2D" parent="Furniture"]
+position = Vector2(2030, 320)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Frame" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -110.0
+offset_top = -70.0
+offset_right = 110.0
+offset_bottom = 70.0
+color = Color(0.32, 0.20, 0.14, 1)
+
+[node name="Mattress" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -102.0
+offset_top = -62.0
+offset_right = 102.0
+offset_bottom = 62.0
+color = Color(0.85, 0.82, 0.78, 1)
+
+[node name="Blanket" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -102.0
+offset_top = -10.0
+offset_right = 102.0
+offset_bottom = 62.0
+color = Color(0.22, 0.30, 0.55, 1)
+
+[node name="BlanketTrim" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -102.0
+offset_top = -10.0
+offset_right = 102.0
+offset_bottom = -4.0
+color = Color(0.35, 0.42, 0.70, 1)
+
+[node name="Pillow" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -90.0
+offset_top = -55.0
+offset_right = -30.0
+offset_bottom = -20.0
+color = Color(0.96, 0.94, 0.90, 1)
+
+[node name="PillowShadow" type="ColorRect" parent="Furniture/Bed"]
+offset_left = -90.0
+offset_top = -20.0
+offset_right = -30.0
+offset_bottom = -14.0
+color = Color(0.75, 0.72, 0.68, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Bed"]
+shape = SubResource("RS_bed")
 
 [node name="WaterBottlesPack" parent="Furniture" unique_id=1140651688 instance=ExtResource("13_sink")]
-position = Vector2(206, 1014)
+position = Vector2(2160, 1014)
 rotation = 3.1415927
 
 [node name="Rug" type="ColorRect" parent="Furniture" unique_id=1622226944]
-offset_left = 900.0
-offset_top = 420.0
-offset_right = 1340.0
-offset_bottom = 650.0
-color = Color(0.58, 0.22, 0.22, 1)
+offset_left = 880.0
+offset_top = 440.0
+offset_right = 1380.0
+offset_bottom = 720.0
+color = Color(0.10, 0.06, 0.18, 1)
 
-[node name="Fridge" type="StaticBody2D" parent="Furniture"]
-position = Vector2(300, 780)
-collision_layer = 3
-collision_mask = 0
+[node name="RugTrim" type="ColorRect" parent="Furniture"]
+offset_left = 880.0
+offset_top = 440.0
+offset_right = 1380.0
+offset_bottom = 448.0
+color = Color(0.55, 0.30, 0.85, 1)
 
-[node name="Body" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = -44.0
-offset_top = -98.0
-offset_right = 44.0
-offset_bottom = 98.0
-color = Color(0.88, 0.88, 0.92, 1)
+[node name="Decor" type="Node2D" parent="."]
 
-[node name="Split" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = -44.0
+[node name="ClothesPile1" type="Node2D" parent="Decor"]
+position = Vector2(430, 720)
+
+[node name="Pile1_Shirt" type="ColorRect" parent="Decor/ClothesPile1"]
+offset_left = -40.0
+offset_top = -22.0
+offset_right = 36.0
+offset_bottom = 14.0
+color = Color(0.85, 0.20, 0.28, 1)
+
+[node name="Pile1_Sleeve" type="ColorRect" parent="Decor/ClothesPile1"]
+offset_left = -36.0
+offset_top = -4.0
+offset_right = 8.0
+offset_bottom = 18.0
+color = Color(0.65, 0.16, 0.22, 1)
+
+[node name="Pile1_Collar" type="ColorRect" parent="Decor/ClothesPile1"]
+offset_left = -8.0
+offset_top = -24.0
+offset_right = 18.0
+offset_bottom = -16.0
+color = Color(0.95, 0.94, 0.90, 1)
+
+[node name="ClothesPile2" type="Node2D" parent="Decor"]
+position = Vector2(1400, 780)
+
+[node name="Pile2_Jeans" type="ColorRect" parent="Decor/ClothesPile2"]
+offset_left = -50.0
+offset_top = -18.0
+offset_right = 40.0
+offset_bottom = 18.0
+color = Color(0.18, 0.30, 0.55, 1)
+
+[node name="Pile2_JeansFold" type="ColorRect" parent="Decor/ClothesPile2"]
+offset_left = -30.0
 offset_top = -2.0
-offset_right = 44.0
-offset_bottom = 2.0
-color = Color(0.65, 0.65, 0.72, 1)
+offset_right = 28.0
+offset_bottom = 14.0
+color = Color(0.12, 0.22, 0.42, 1)
 
-[node name="HandleTop" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = 28.0
-offset_top = -78.0
-offset_right = 34.0
-offset_bottom = -38.0
-color = Color(0.55, 0.55, 0.6, 1)
+[node name="Pile2_Belt" type="ColorRect" parent="Decor/ClothesPile2"]
+offset_left = -42.0
+offset_top = -12.0
+offset_right = 30.0
+offset_bottom = -7.0
+color = Color(0.18, 0.10, 0.06, 1)
 
-[node name="HandleBot" type="ColorRect" parent="Furniture/Fridge"]
-offset_left = 28.0
-offset_top = 18.0
-offset_right = 34.0
-offset_bottom = 78.0
-color = Color(0.55, 0.55, 0.6, 1)
+[node name="ClothesPile3" type="Node2D" parent="Decor"]
+position = Vector2(720, 950)
 
-[node name="BeerSpawnPoint" type="Node2D" parent="Furniture/Fridge"]
-position = Vector2(0, 140)
+[node name="Pile3_Hoodie" type="ColorRect" parent="Decor/ClothesPile3"]
+offset_left = -44.0
+offset_top = -28.0
+offset_right = 40.0
+offset_bottom = 16.0
+color = Color(0.20, 0.20, 0.24, 1)
 
-[node name="FridgeInteract" type="Area2D" parent="Furniture/Fridge"]
-collision_layer = 0
-collision_mask = 1
-script = ExtResource("15_fridge")
+[node name="Pile3_Hood" type="ColorRect" parent="Decor/ClothesPile3"]
+offset_left = -24.0
+offset_top = -30.0
+offset_right = 18.0
+offset_bottom = -12.0
+color = Color(0.30, 0.30, 0.36, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge/FridgeInteract"]
-shape = SubResource("RS_fridge_interact")
+[node name="Pile3_Drawstring" type="ColorRect" parent="Decor/ClothesPile3"]
+offset_left = -2.0
+offset_top = -12.0
+offset_right = 2.0
+offset_bottom = 4.0
+color = Color(0.85, 0.82, 0.74, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge"]
-shape = SubResource("RS_bookshelf")
+[node name="ClothesPile4" type="Node2D" parent="Decor"]
+position = Vector2(1820, 970)
+
+[node name="Pile4_Sock1" type="ColorRect" parent="Decor/ClothesPile4"]
+offset_left = -22.0
+offset_top = -10.0
+offset_right = 4.0
+offset_bottom = 6.0
+color = Color(0.92, 0.92, 0.95, 1)
+
+[node name="Pile4_Sock2" type="ColorRect" parent="Decor/ClothesPile4"]
+offset_left = 6.0
+offset_top = -6.0
+offset_right = 28.0
+offset_bottom = 12.0
+color = Color(0.85, 0.85, 0.90, 1)
+
+[node name="Pile4_SockStripe1" type="ColorRect" parent="Decor/ClothesPile4"]
+offset_left = -20.0
+offset_top = -4.0
+offset_right = 2.0
+offset_bottom = -1.0
+color = Color(0.55, 0.30, 0.85, 1)
+
+[node name="PizzaBox" type="Node2D" parent="Decor"]
+position = Vector2(1100, 380)
+
+[node name="Pizza_Box" type="ColorRect" parent="Decor/PizzaBox"]
+offset_left = -28.0
+offset_top = -28.0
+offset_right = 28.0
+offset_bottom = 28.0
+color = Color(0.88, 0.78, 0.55, 1)
+
+[node name="Pizza_BoxShadow" type="ColorRect" parent="Decor/PizzaBox"]
+offset_left = -28.0
+offset_top = 24.0
+offset_right = 28.0
+offset_bottom = 28.0
+color = Color(0.60, 0.50, 0.30, 1)
+
+[node name="Pizza_Logo" type="ColorRect" parent="Decor/PizzaBox"]
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = -4.0
+color = Color(0.75, 0.18, 0.18, 1)
+
+[node name="EnergyDrink1" type="Node2D" parent="Decor"]
+position = Vector2(1340, 350)
+
+[node name="Drink1_Can" type="ColorRect" parent="Decor/EnergyDrink1"]
+offset_left = -8.0
+offset_top = -18.0
+offset_right = 8.0
+offset_bottom = 18.0
+color = Color(0.20, 0.85, 0.35, 1)
+
+[node name="Drink1_Tab" type="ColorRect" parent="Decor/EnergyDrink1"]
+offset_left = -6.0
+offset_top = -20.0
+offset_right = 6.0
+offset_bottom = -14.0
+color = Color(0.70, 0.70, 0.72, 1)
+
+[node name="Drink1_Label" type="ColorRect" parent="Decor/EnergyDrink1"]
+offset_left = -8.0
+offset_top = -4.0
+offset_right = 8.0
+offset_bottom = 4.0
+color = Color(0.04, 0.04, 0.06, 1)
+
+[node name="EnergyDrink2" type="Node2D" parent="Decor"]
+position = Vector2(870, 470)
+rotation = 1.2
+
+[node name="Drink2_Can" type="ColorRect" parent="Decor/EnergyDrink2"]
+offset_left = -7.0
+offset_top = -16.0
+offset_right = 7.0
+offset_bottom = 16.0
+color = Color(0.90, 0.30, 0.20, 1)
+
+[node name="Drink2_Label" type="ColorRect" parent="Decor/EnergyDrink2"]
+offset_left = -7.0
+offset_top = -4.0
+offset_right = 7.0
+offset_bottom = 4.0
+color = Color(0.04, 0.04, 0.06, 1)
 
 [node name="Pickups" type="Node2D" parent="." unique_id=1333128997]
 
 [node name="Medkit" parent="Pickups" instance=ExtResource("14_medkit")]
-position = Vector2(1220, 980)
+position = Vector2(1200, 980)
 
 [node name="Doors" type="Node2D" parent="." unique_id=859804174]
 
@@ -362,34 +695,37 @@ shape = SubResource("RS_finish")
 [node name="Enemies" type="Node2D" parent="." unique_id=690777025]
 
 [node name="Slime1" parent="Enemies" unique_id=1889636774 instance=ExtResource("2_slime")]
-position = Vector2(850, 700)
+position = Vector2(640, 920)
 scale = Vector2(2, 2)
 
 [node name="Slime2" parent="Enemies" unique_id=768106268 instance=ExtResource("2_slime")]
-position = Vector2(1450, 880)
+position = Vector2(1480, 380)
 scale = Vector2(2, 2)
 
 [node name="Slime3" parent="Enemies" unique_id=1724892630 instance=ExtResource("2_slime")]
-position = Vector2(1700, 300)
+position = Vector2(1880, 600)
 scale = Vector2(2, 2)
 
 [node name="Slime4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_slime")]
-position = Vector2(2050, 950)
+position = Vector2(1300, 950)
 scale = Vector2(2, 2)
+
+[node name="BossPalm" parent="Enemies" instance=ExtResource("16_boss_palm")]
+position = Vector2(2000, 820)
 
 [node name="Plants" type="Node2D" parent="." unique_id=1947606980]
 
 [node name="Plant1" parent="Plants" unique_id=1513850101 instance=ExtResource("3_plant")]
-position = Vector2(400, 850)
+position = Vector2(420, 880)
 
 [node name="Plant2" parent="Plants" unique_id=1989922575 instance=ExtResource("3_plant")]
-position = Vector2(1250, 250)
+position = Vector2(1100, 880)
 
 [node name="Plant3" parent="Plants" unique_id=1435150276 instance=ExtResource("3_plant")]
-position = Vector2(2120, 200)
+position = Vector2(1700, 950)
 
 [node name="Player" parent="." unique_id=679024543 instance=ExtResource("1_player")]
-position = Vector2(250, 250)
+position = Vector2(250, 600)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=2027460495]
 
@@ -489,14 +825,14 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 1, 0.55, 1)
 theme_override_font_sizes/font_size = 36
-text = "POZIOM UKOŃCZONY"
+text = "GRA UKOŃCZONA"
 horizontal_alignment = 1
 
 [node name="Sub" type="Label" parent="Overlays/CompletionScreen/Panel/VBox" unique_id=464204997]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 20
-text = "Rośliny uratowane. Dom bezpieczny."
+text = "Gratulacje! Wszystkie rośliny uratowane,\ndom odzyskany."
 horizontal_alignment = 1
 
 [node name="TimeLabel" type="Label" parent="Overlays/CompletionScreen/Panel/VBox" unique_id=2057189580]

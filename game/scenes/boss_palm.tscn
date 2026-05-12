@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/images/plant_bloomed.png" id="1_tex"]
+[ext_resource type="Script" path="res://scripts/boss_palm.gd" id="2_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/hit_enemy.mp3" id="3_hit"]
+[ext_resource type="PackedScene" path="res://scenes/health_bar.tscn" id="4_health"]
+
+[sub_resource type="RectangleShape2D" id="RS_body"]
+size = Vector2(30, 28)
+
+[sub_resource type="CircleShape2D" id="CS_sight"]
+radius = 560.0
+
+[sub_resource type="CircleShape2D" id="CS_melee"]
+radius = 48.0
+
+[sub_resource type="CircleShape2D" id="CS_medium"]
+radius = 120.0
+
+[node name="BossPalm" type="CharacterBody2D"]
+collision_layer = 3
+collision_mask = 1
+script = ExtResource("2_script")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(2.2, 2.2)
+texture = ExtResource("1_tex")
+modulate = Color(0.9, 1.0, 0.9, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RS_body")
+
+[node name="Sight" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sight"]
+shape = SubResource("CS_sight")
+
+[node name="MeleeHitbox" type="Area2D" parent="."]
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeHitbox"]
+shape = SubResource("CS_melee")
+
+[node name="MediumHitbox" type="Area2D" parent="."]
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MediumHitbox"]
+shape = SubResource("CS_medium")
+
+[node name="TakeDamage" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_hit")
+pitch_scale = 0.9
+
+[node name="HealthBar" parent="." instance=ExtResource("4_health")]
+position = Vector2(-10, 22)

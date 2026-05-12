@@ -1,10 +1,36 @@
-[gd_scene load_steps=13 format=3 uid="uid://mainmenu0001"]
+[gd_scene load_steps=14 format=3 uid="uid://mainmenu0001"]
 
 [ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="1_theme"]
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="2_menu"]
 [ext_resource type="Texture2D" path="res://assets/images/plant_friendly.png" id="3_plant"]
 [ext_resource type="Texture2D" path="res://assets/images/enemies/Cactus.png" id="4_cactus"]
 [ext_resource type="FontFile" uid="uid://1xumrtike0fb" path="res://assets/fonts/PressStart2P.ttf" id="5_titlefont"]
+
+[sub_resource type="StyleBoxFlat" id="SB_menu_panel"]
+content_margin_left = 36.0
+content_margin_top = 28.0
+content_margin_right = 36.0
+content_margin_bottom = 28.0
+bg_color = Color(0.10, 0.07, 0.05, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.70, 0.30, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_toast"]
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 14.0
+bg_color = Color(0.06, 0.18, 0.08, 0.94)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.55, 0.95, 0.45, 1)
+anti_aliasing = false
 
 [sub_resource type="AtlasTexture" id="AT_plant_menu"]
 atlas = ExtResource("3_plant")
@@ -137,10 +163,10 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -380.0
-offset_top = -280.0
+offset_top = -340.0
 offset_right = 380.0
-offset_bottom = 60.0
-theme_override_constants/separation = 28
+offset_bottom = 340.0
+theme_override_constants/separation = 22
 alignment = 1
 
 [node name="Title" type="Label" parent="CenterColumn"]
@@ -163,15 +189,29 @@ text = "Apokalipsa roślin"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="CenterColumn"]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
 [node name="PlayButton" type="Button" parent="CenterColumn"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(380, 80)
+custom_minimum_size = Vector2(420, 72)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Zagraj w demo"
+text = "Rozpocznij nową grę"
+
+[node name="LevelSelectButton" type="Button" parent="CenterColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Wybór poziomu"
+
+[node name="QuitButton" type="Button" parent="CenterColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Wyjście z gry"
 
 [node name="PressHint" type="Label" parent="CenterColumn"]
 unique_name_in_owner = true
@@ -180,8 +220,111 @@ theme_override_colors/font_color = Color(0.75, 0.65, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 18
-text = "naciśnij SPACJĘ lub kliknij ZAGRAJ"
+text = "naciśnij SPACJĘ lub kliknij ROZPOCZNIJ NOWĄ GRĘ"
 horizontal_alignment = 1
+
+[node name="LevelSelectOverlay" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="LevelSelectOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="PanelContainer" parent="LevelSelectOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -290.0
+offset_right = 260.0
+offset_bottom = 290.0
+theme_override_styles/panel = SubResource("SB_menu_panel")
+
+[node name="VBox" type="VBoxContainer" parent="LevelSelectOverlay/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="LevelSelectOverlay/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 32
+text = "Wybór poziomu"
+horizontal_alignment = 1
+
+[node name="Level1Btn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "1. Salon"
+
+[node name="Level2Btn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "2. Kuchnia"
+
+[node name="Level3Btn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "3. Sypialnia"
+
+[node name="Level4Btn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "4. Pokój gamingowy"
+
+[node name="BackBtn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Powrót"
+
+[node name="CompletionToast" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -340.0
+offset_top = 30.0
+offset_right = 340.0
+offset_bottom = 130.0
+theme_override_styles/panel = SubResource("SB_toast")
+
+[node name="Label" type="Label" parent="CompletionToast"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.78, 1)
+theme_override_colors/font_outline_color = Color(0, 0.05, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1
@@ -196,5 +339,5 @@ offset_right = 300.0
 offset_bottom = -10.0
 theme_override_colors/font_color = Color(0.55, 0.45, 0.30, 1)
 theme_override_font_sizes/font_size = 16
-text = "v0.1 demo — poziom tutorialowy"
+text = "v0.2 — Salon → Kuchnia → Sypialnia → Pokój gamingowy"
 horizontal_alignment = 1

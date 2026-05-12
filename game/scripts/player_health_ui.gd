@@ -1,9 +1,8 @@
 extends Control
 
 
-const HEART_COUNT: int = 3
 const HEALTH_PER_HEART: int = 30
-const MAX_HEALTH: int = HEART_COUNT * HEALTH_PER_HEART
+const DEFAULT_MAX_HEALTH: int = 3 * HEALTH_PER_HEART
 
 const HEART_WIDTH: int = 7
 const HEART_HEIGHT: int = 6
@@ -24,16 +23,17 @@ const HEART_ROWS := [
 const FILLED_COLOR := Color(0.94902, 0.32549, 0.439216, 1.0)
 const EMPTY_COLOR := Color(0.247059, 0.160784, 0.2, 1.0)
 
-var current_health: int = MAX_HEALTH
+var current_health: int = DEFAULT_MAX_HEALTH
+var max_health: int = DEFAULT_MAX_HEALTH
+var heart_count: int = 3
 
 
 func _ready() -> void:
-	var total_width := (HEART_COUNT * HEART_WIDTH * PIXEL_SIZE) + ((HEART_COUNT - 1) * HEART_SPACING)
-	custom_minimum_size = Vector2(total_width, HEART_HEIGHT * PIXEL_SIZE)
+	_recalculate_layout()
 
 
 func _draw() -> void:
-	for heart_index in range(HEART_COUNT):
+	for heart_index in range(heart_count):
 		_draw_heart(heart_index)
 
 
@@ -55,11 +55,19 @@ func _draw_heart(heart_index: int) -> void:
 			draw_rect(pixel_rect, pixel_color, true)
 
 
-func set_health(new_health: int, max_health: int = MAX_HEALTH) -> void:
-	var clamped_max_health: int = max_health if max_health > 0 else 1
-	current_health = clampi(new_health, 0, clamped_max_health)
+func set_health(new_health: int, max_health: int = DEFAULT_MAX_HEALTH) -> void:
+	self.max_health = max_health if max_health > 0 else 1
+	heart_count = int(ceil(float(self.max_health) / float(HEALTH_PER_HEART)))
+	current_health = clampi(new_health, 0, self.max_health)
+	_recalculate_layout()
 	queue_redraw()
 
 
 func _on_player_health_changed(current: int, max_health: int) -> void:
 	set_health(current, max_health)
+
+
+func _recalculate_layout() -> void:
+	heart_count = maxi(heart_count, 1)
+	var total_width := (heart_count * HEART_WIDTH * PIXEL_SIZE) + ((heart_count - 1) * HEART_SPACING)
+	custom_minimum_size = Vector2(total_width, HEART_HEIGHT * PIXEL_SIZE)

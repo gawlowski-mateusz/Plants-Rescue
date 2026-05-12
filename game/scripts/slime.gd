@@ -4,10 +4,10 @@ extends CharacterBody2D
 signal died
 
 
-const SPEED: float = 100.0
-const KNOCKBACK_FORCE: int = 100
-const ATTACK_DAMAGE: int = 15
-const ATTACK_INTERVAL: float = 0.8
+@export var move_speed: float = 100.0
+@export var knockback_force: float = 100.0
+@export var attack_damage: int = 15
+@export var attack_interval: float = 0.8
 
 var is_alive: bool = true
 var health = 100
@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
-func _attack(delta: float) -> void:
+func _attack(_delta: float) -> void:
 	if is_target_in_attack_range:
 		# Player in range — stand still and play spine attack animation
 		velocity = Vector2.ZERO
@@ -56,7 +56,7 @@ func _attack(delta: float) -> void:
 
 	# Chase the player — play walk animation
 	var direction = (target.position - position).normalized()
-	velocity = direction * SPEED
+	velocity = direction * move_speed
 	animated_sprite_2d.play("attack")
 
 
@@ -65,9 +65,9 @@ func _try_attack_target() -> void:
 		return
 
 	if target and target.has_method("take_damage"):
-		target.take_damage(ATTACK_DAMAGE)
+		target.take_damage(attack_damage)
 
-	attack_cooldown_left = ATTACK_INTERVAL
+	attack_cooldown_left = attack_interval
 
 
 func take_damage(damage: int, attacker_position: Vector2):
@@ -91,7 +91,7 @@ func _flash_red() -> void:
 func _apply_knockback(attacker_position: Vector2) -> void:
 	var knockback_dir = (position - attacker_position).normalized()
 	is_being_knocked_back = true
-	velocity = knockback_dir * KNOCKBACK_FORCE * 4.0
+	velocity = knockback_dir * knockback_force * 4.0
 
 	var tween = create_tween()
 	tween.tween_interval(0.15)

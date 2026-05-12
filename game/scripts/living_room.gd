@@ -4,7 +4,12 @@ extends Node2D
 enum State { PLAY, COMPLETE, GAME_OVER }
 
 
-const TOTAL_ENEMIES: int = 4
+@export var next_scene_path: String = ""
+@export var show_onboarding_tutorials: bool = true
+
+
+const BOSS_TROPHY_UI_SCENE: PackedScene = preload("res://scenes/boss_trophy_ui.tscn")
+const BOSS_REWARD_DIALOG_SCENE: PackedScene = preload("res://scenes/boss_reward_dialog.tscn")
 
 
 @onready var player: CharacterBody2D = $Player
@@ -26,6 +31,10 @@ const TOTAL_ENEMIES: int = 4
 @onready var game_over_restart_btn: Button = $Overlays/GameOverScreen/Panel/VBox/RestartBtn
 @onready var game_over_menu_btn: Button = $Overlays/GameOverScreen/Panel/VBox/MenuBtn
 
+var _trophy_ui: Control = null
+var _boss_reward_dialog: CanvasLayer = null
+var _boss_dialog_locked_player: bool = false
+
 
 var state: int = State.PLAY
 var plants_watered: int = 0
@@ -45,8 +54,14 @@ func _ready() -> void:
 	completion_screen.visible = false
 	game_over_screen.visible = false
 
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("save_level_start_stats"):
+		gs.call("save_level_start_stats", player.current_water_capacity, player.current_acid_capacity)
+	elif gs != null and gs.has_method("save_level_start_health"):
+		gs.call("save_level_start_health")
+
 	plants_to_rescue_total = $Plants.get_child_count()
-	enemies_to_kill_total = TOTAL_ENEMIES
+	enemies_to_kill_total = $Enemies.get_child_count()
 
 	# Connect plants
 	for plant in $Plants.get_children():
@@ -57,8 +72,7 @@ func _ready() -> void:
 
 	# Connect enemies
 	for enemy in $Enemies.get_children():
-		if enemy.has_signal("died"):
-			enemy.died.connect(_on_enemy_died)
+		_connect_enemy(enemy)
 
 	door2.interacted.connect(_on_door2_interacted)
 	door2.opened.connect(_on_door2_opened)
@@ -70,13 +84,16 @@ func _ready() -> void:
 	game_over_restart_btn.pressed.connect(_restart_scene)
 	game_over_menu_btn.pressed.connect(_return_to_menu)
 
+	_setup_boss_reward_ui()
+
 	_update_labels()
 
-	# Quick onboarding sequence
-	_queue_tutorial("LPM — strzelaj wodą\nPodlej rośliny aby je uratować", 4.5)
-	_queue_tutorial("X — przełącz między wodą a kwasem\nKwas rani wrogów", 4.5)
-	_queue_tutorial("Prawy przycisk myszy — auto-celowanie\nw wroga pod kursorem", 4.5)
-	_queue_tutorial("Uratuj wszystkie 3 rośliny\ni pokonaj 4 zmutowane potwory", 4.5)
+	if show_onboarding_tutorials:
+		# Quick onboarding sequence
+		_queue_tutorial("LPM — strzelaj wodą\nPodlej rośliny aby je uratować", 4.5)
+		_queue_tutorial("X — przełącz między wodą a kwasem\nKwas rani wrogów", 4.5)
+		_queue_tutorial("Prawy przycisk myszy — auto-celowanie\nw wroga pod kursorem", 4.5)
+		_queue_tutorial("Uratuj wszystkie %d rośliny\ni pokonaj %d zmutowane potwory" % [plants_to_rescue_total, enemies_to_kill_total], 4.5)
 
 
 func _process(delta: float) -> void:
@@ -96,10 +113,7 @@ func _on_plant_watered() -> void:
 
 func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 	# Make sure we count the corrupted enemy kill.
-	if enemy != null and enemy.has_signal("died"):
-		var died_cb := Callable(self, "_on_enemy_died")
-		if not enemy.is_connected("died", died_cb):
-			enemy.connect("died", died_cb)
+	_connect_enemy(enemy)
 
 	var was_watered := false
 	if plant is FriendlyPlant:
@@ -115,10 +129,111 @@ func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 	_check_objectives()
 
 
-func _on_enemy_died() -> void:
+func _on_enemy_died(enemy: Node2D) -> void:
 	enemies_killed += 1
 	_update_labels()
+	_handle_boss_defeat(enemy)
 	_check_objectives()
+
+
+func _connect_enemy(enemy: Node2D) -> void:
+	if enemy == null:
+		return
+	if not enemy.has_signal("died"):
+		return
+
+	var died_cb := Callable(self, "_on_enemy_died").bind(enemy)
+	if enemy.is_connected("died", died_cb):
+		return
+	enemy.connect("died", died_cb)
+
+
+func _setup_boss_reward_ui() -> void:
+	var ui_parent := get_node_or_null("UI")
+	if ui_parent != null and BOSS_TROPHY_UI_SCENE != null:
+		_trophy_ui = BOSS_TROPHY_UI_SCENE.instantiate() as Control
+		if _trophy_ui != null:
+			ui_parent.add_child(_trophy_ui)
+
+	var overlays := get_node_or_null("Overlays")
+	if overlays != null and BOSS_REWARD_DIALOG_SCENE != null:
+		_boss_reward_dialog = BOSS_REWARD_DIALOG_SCENE.instantiate() as CanvasLayer
+		if _boss_reward_dialog != null:
+			overlays.add_child(_boss_reward_dialog)
+			if _boss_reward_dialog.has_signal("closed"):
+				_boss_reward_dialog.closed.connect(_on_boss_reward_dialog_closed)
+
+
+func _on_boss_reward_dialog_closed() -> void:
+	if _boss_dialog_locked_player and state == State.PLAY:
+		player.input_locked = false
+	_boss_dialog_locked_player = false
+
+
+func _handle_boss_defeat(enemy: Node2D) -> void:
+	var boss_id := _get_boss_id(enemy)
+	if boss_id.is_empty():
+		return
+
+	var gs := get_node_or_null("/root/GameState")
+	if gs == null:
+		return
+
+	var newly_awarded := false
+	var title := "TROFEUM!"
+	var body := ""
+
+	match boss_id:
+		"vine":
+			newly_awarded = bool(gs.call("award_boss_vine"))
+			body = "Pokonałeś bossa: Pnącze gniewu\nBonus: większy zasięg nożyczek"
+		"mushroom":
+			newly_awarded = bool(gs.call("award_boss_mushroom"))
+			body = "Pokonałeś bossa: Grzybek halucynek\nBonus: +1 serce"
+		"palm":
+			newly_awarded = bool(gs.call("award_boss_palm"))
+			body = "Pokonałeś bossa: Palma kokosowa\nZdobyto trofeum"
+		_:
+			return
+
+	if not newly_awarded:
+		return
+
+	if newly_awarded and player != null and player.has_method("sync_from_game_state"):
+		player.sync_from_game_state()
+
+	if newly_awarded and _trophy_ui != null and _trophy_ui.has_method("unlock_trophy"):
+		_trophy_ui.unlock_trophy(boss_id)
+
+	_show_boss_reward_dialog(title, body)
+
+
+func _show_boss_reward_dialog(title: String, body: String) -> void:
+	if _boss_reward_dialog == null:
+		return
+	if not _boss_reward_dialog.has_method("show_reward"):
+		return
+
+	if not player.input_locked:
+		_boss_dialog_locked_player = true
+		player.input_locked = true
+	else:
+		_boss_dialog_locked_player = false
+
+	_boss_reward_dialog.call("show_reward", title, body)
+
+
+func _get_boss_id(enemy: Node2D) -> String:
+	if enemy == null:
+		return ""
+	var n := String(enemy.name)
+	if n.begins_with("BossVine"):
+		return "vine"
+	if n.begins_with("BossMushroom"):
+		return "mushroom"
+	if n.begins_with("BossPalm"):
+		return "palm"
+	return ""
 
 
 func _update_labels() -> void:
@@ -151,13 +266,53 @@ func _on_door2_opened(_door_id: String) -> void:
 	await get_tree().create_timer(0.35).timeout
 	# After the door opens the player may just walk into FinishTrigger,
 	# but we also force-complete here in case of edge cases.
-	_complete()
+	_finish_level()
 
 
 func _on_finish_trigger(body: Node2D) -> void:
 	if body != player:
 		return
-	_complete()
+	_finish_level()
+
+
+func _finish_level() -> void:
+	if state != State.PLAY:
+		return
+
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and bool(gs.get("is_single_level_mode")):
+		state = State.COMPLETE
+		player.input_locked = true
+		var level_name := _get_current_level_display_name()
+		if gs.has_method("queue_completion_message"):
+			gs.call("queue_completion_message",
+					"Ukończono poziom: %s\nGratulacje!" % level_name)
+		gs.set("is_single_level_mode", false)
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+		return
+
+	# If there is no next scene, this is the final level and we show the
+	# completion overlay.
+	if next_scene_path.strip_edges() == "":
+		_complete()
+		return
+
+	state = State.COMPLETE
+	player.input_locked = true
+	get_tree().change_scene_to_file(next_scene_path)
+
+
+func _get_current_level_display_name() -> String:
+	var path := String(scene_file_path)
+	if path.ends_with("living_room.tscn"):
+		return "Salon"
+	if path.ends_with("kitchen.tscn"):
+		return "Kuchnia"
+	if path.ends_with("bedroom.tscn"):
+		return "Sypialnia"
+	if path.ends_with("balcony.tscn"):
+		return "Pokój gamingowy"
+	return "Poziom"
 
 
 func _complete() -> void:
@@ -165,8 +320,9 @@ func _complete() -> void:
 		return
 	state = State.COMPLETE
 	player.input_locked = true
-	var mins := int(elapsed) / 60
-	var secs := int(elapsed) % 60
+	var total_seconds := int(elapsed)
+	var mins := int(total_seconds / 60.0)
+	var secs := total_seconds % 60
 	completion_time_label.text = "Czas: %02d:%02d" % [mins, secs]
 	completion_screen.visible = true
 
@@ -216,10 +372,18 @@ func _play_next_tutorial() -> void:
 # ---------------------------------------------------------------
 
 func _restart_scene() -> void:
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("restore_level_start_stats"):
+		gs.call("restore_level_start_stats")
+	elif gs != null and gs.has_method("restore_level_start_health"):
+		gs.call("restore_level_start_health")
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
 func _return_to_menu() -> void:
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("reset_run"):
+		gs.reset_run()
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
