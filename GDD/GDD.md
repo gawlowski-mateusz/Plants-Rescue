@@ -106,9 +106,9 @@ Gra osadzona jest w studenckiej kawalerce / mieszkaniu dzielonym. Każdy pokój 
 | --- | --- | --- |
 | **Pokój 1 — Przedpokój (Foyer)** | Tutorial. Gracz czyta list wprowadzający fabułę, poznaje sterowanie (WASD — ruch). Brak wrogów i roślin do podlania. Po prawej stronie znajdują się drzwi prowadzące do salonu — gracz musi do nich podejść i wcisnąć SPACJA/E aby je otworzyć. | ✅ Zaimplementowany |
 | **Pokój 2 — Salon (Living Room)** | Główny poziom rozgrywki. 3 rośliny do podlania + 4 zmutowane potwory (Slime). Gracz uczy się strzelania wodą (LPM), przełączania na kwas (X), ataku nożyczkami oraz target-locka (PPM). Po wykonaniu wszystkich celów drzwi wyjściowe się odblokowują. Czas przejścia jest mierzony i wyświetlany na ekranie ukończenia. | ✅ Zaimplementowany |
-| **Pokój 3 — Kuchnia** | Kwiaty na parapecie + fermentujące warzywa jako wrogowie. Wyższy poziom trudności. | 🔲 Planowany |
-| **Pokój 4 — Sypialnia** | Więcej wrogów, wąskie przejścia między meblami. Wyższy poziom trudności. | 🔲 Planowany |
-| **Pokój 5 — Balkon** | Boss końcowy. Finałowa walka i zakończenie gry. | 🔲 Planowany |
+| **Pokój 3 — Kuchnia** | Kwiaty na parapecie + fermentujące warzywa jako wrogowie. Wyższy poziom trudności. | ✅ Zaimplementowany |
+| **Pokój 4 — Sypialnia** | Więcej wrogów, wąskie przejścia między meblami. Wyższy poziom trudności. | ✅ Zaimplementowany |
+| **Pokój 5 — Pokoj gamingowy** | Boss końcowy. Finałowa walka i zakończenie gry. | ✅ Zaimplementowany |
 
 ### 2.2. Fabuła
 
@@ -135,7 +135,7 @@ Przejście przez pokoje mieszkania, podlanie przyjaznych roślin i pokonanie zmu
 | **HP** | 90 (wyświetlane jako 3 pikselowe serduszka po 30 HP każde) |
 | **Prędkość** | 300 px/s |
 | **Atak wręcz (nożyczki)** | 20 obrażeń, z animacją i hitboxem kierunkowym |
-| **Zbiornik wody** | Pojemność: 100, koszt strzału: 10, regeneracja: 18/s po 2,5 s bez obrażeń (tylko gdy opróżniony) |
+| **Zbiornik wody** | Pojemność: 100, koszt strzału: 10, regeneracja: napełnienie zbiornika butelkami wody rozmieszczonymi na poziomach |
 | **Zbiornik kwasu** | Pojemność: 100, koszt strzału: 10, cooldown po opróżnieniu: 7 s (auto-refill do 100) |
 | **Animacje** | idle, run, attack (kierunkowe: right/up/down, flip_h dla left), dying |
 
@@ -199,7 +199,7 @@ Gracz może kliknąć PPM na wrogu aby zablokować celownik — pociski będą l
 | **Atak wręcz (nożyczki)** | Dedykowany klawisz (action: attack) |
 | **Przełącz substancję (WATER / ACID)** | X |
 | **Target lock (auto-aim na przeciwnika)** | PPM (prawy przycisk myszy) |
-| **Interakcja (drzwi)** | E / SPACJA |
+| **Interakcja (drzwi / piwo / woda)** | E / SPACJA |
 | **Pauza** | ESC — otwiera menu pauzy |
 
 ## 4. Przebieg gry
@@ -222,6 +222,8 @@ Po kliknięciu PLAY gracz trafia do Pokoju 1 (Przedpokój). Na ekranie wyświetl
 #### Menu startowe
 
 - PLAY — uruchamia grę od Pokoju 1
+- Wybór poziomu - rozpocznij grę od dowlonego poziomu
+- Wyjdź z gry - zamyka okno gry
 
 #### HUD (Head-Up Display)
 
@@ -231,7 +233,7 @@ Po kliknięciu PLAY gracz trafia do Pokoju 1 (Przedpokój). Na ekranie wyświetl
   - 🧪 **KWAS** — zielony pasek (ProgressBar) + status cooldown (`Gotowy` / licznik czasu do odnowienia np. `5.2s`)
   - Wizualne wyciszanie nieaktywnego trybu (zmiana koloru tytułu na brązowy)
 - Nad obiektami w świecie:
-  - wrogie Slime'y: pasek HP (czerwony, zmniejsza się proporcjonalnie)
+  - wrogowie: pasek HP (czerwony, zmniejsza się proporcjonalnie)
   - przyjazne rośliny: pasek nawodnienia (niebieski, rośnie z podlewaniem)
 - Cele poziomu (Salon): etykiety „Rośliny podlane: X / 3" i „Wrogowie pokonani: X / 4"
 
@@ -297,7 +299,7 @@ Komunikaty pojawiające się jako animowane panele (fade-in → wyświetlanie �
 #### Stany roślin
 
 - Rośliny przyjazne: stan suchy/blade (modulate wygaszony) → podlewana (stopniowe rozjaśnianie) → rozkwitnięta (osobny sprite z pulsacją)
-- Slime (przeciwnik): idle, attack (pościg), spine_attack (atak kontaktowy), die
+- wroga roślina: idle, attack (pościg), spine_attack (atak kontaktowy), die
 
 ![rosliny](https://github.com/user-attachments/assets/d0ce3624-0ccc-4509-b101-5118cc8a0c1c)
 
@@ -305,6 +307,8 @@ Komunikaty pojawiające się jako animowane panele (fade-in → wyświetlanie �
 
 - Pokój 1 — Przedpokój: proste tło z drzwiami po prawej, scroll/list na podłodze
 - Pokój 2 — Salon: kafle podłogowe, kanapa, papiery, rozbite doniczki, rośliny, wrogowie rozmieszczeni w pokoju
+- Pokój 3 - Kuchnia: kafle podłogowe, meble kuchenne, sprzęty AGD
+- Pokój 4 - Pokój gamingowy: ubrania na podłodze, rozrzucone puste zgniecione puszki
 - Meble jako niezależne obiekty z kolizjami (sofa, stolik)
 
 ![pokoj](https://github.com/user-attachments/assets/34bfd26e-a813-4e92-8cbf-9283b25674db)
@@ -361,9 +365,9 @@ Celem prototypu jest weryfikacja głównych mechanik gry w środowisku Godot 4.6
 - ✅ HUD: serduszka, panele zbiorników (woda + kwas z cooldown), cele poziomu
 - ✅ Menu główne, intro (letter overlay), system tutoriali (toasty)
 - ✅ Przejścia między scenami (Przedpokój → Salon), ekran ukończenia z czasem
-- 🔲 Dodatkowe typy przeciwników
-- 🔲 Kolejne pokoje (3–5)
+- ✅ Dodatkowe typy przeciwników
+- ✅ Kolejne pokoje (3–5)
 - 🔲 Muzyka tła (BGM)
 - 🔲 Dodatkowe efekty dźwiękowe
 
-Plants Rescue — GDD v2.0
+Plants Rescue — GDD v3.0
