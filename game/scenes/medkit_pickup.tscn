@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/medkit_pickup.gd" id="1_medkit"]
 
 [sub_resource type="CircleShape2D" id="CS_pickup"]
-radius = 18.0
+radius = 40.0
 
 [node name="MedkitPickup" type="Area2D"]
 collision_layer = 0
@@ -14,4 +14,5 @@ script = ExtResource("1_medkit")
 shape = SubResource("CS_pickup")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(2.5, 2.5)
 texture_filter = 1

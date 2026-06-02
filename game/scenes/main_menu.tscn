@@ -145,9 +145,17 @@ stretch_mode = 5
 flip_h = true
 modulate = Color(1, 1, 1, 0.85)
 
-[node name="Cactus" type="AnimatedSprite2D" parent="."]
-position = Vector2(700, 480)
-scale = Vector2(3.2, 3.2)
+[node name="CactusLeft" type="AnimatedSprite2D" parent="."]
+position = Vector2(155, 320)
+scale = Vector2(2.8, 2.8)
+sprite_frames = SubResource("SF_cactus")
+animation = &"walk"
+autoplay = "walk"
+modulate = Color(0.80, 0.95, 0.80, 1)
+
+[node name="CactusRight" type="AnimatedSprite2D" parent="."]
+position = Vector2(1000, 320)
+scale = Vector2(2.8, 2.8)
 sprite_frames = SubResource("SF_cactus")
 animation = &"walk"
 autoplay = "walk"

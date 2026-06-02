@@ -14,6 +14,7 @@ var _bubble: Control = null
 
 
 @onready var _bottles_container: Node = $Blocker/Bottles
+@onready var _sprite: Sprite2D = $Blocker/Sprite2D
 
 
 func _ready() -> void:
@@ -23,7 +24,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 	_refresh_bottles_visual()
-	call_deferred("_setup_water_bubble")
+	#call_deferred("_setup_water_bubble")
 
 
 func _setup_water_bubble() -> void:
@@ -113,9 +114,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _refresh_bottles_visual() -> void:
+	# Fade sprite based on remaining bottles
+	if _sprite != null:
+		var ratio := float(bottles_left) / float(starting_bottles)
+		_sprite.modulate.a = clampf(0.3 + ratio * 0.7, 0.3, 1.0)
+
+	# Also hide old ColorRect bottles if they exist
 	if _bottles_container == null:
 		return
-
 	var bottles := _bottles_container.get_children()
 	var visible_count := clampi(bottles_left, 0, bottles.size())
 	for i in range(bottles.size()):

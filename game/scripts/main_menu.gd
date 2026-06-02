@@ -6,7 +6,8 @@ extends Control
 @onready var quit_button: Button = %QuitButton
 @onready var title: Label = %Title
 @onready var press_hint: Label = %PressHint
-@onready var cactus: AnimatedSprite2D = $Cactus
+@onready var cactus_left: AnimatedSprite2D = $CactusLeft
+@onready var cactus_right: AnimatedSprite2D = $CactusRight
 
 @onready var level_select_overlay: Control = %LevelSelectOverlay
 @onready var level1_btn: Button = %Level1Btn
@@ -18,11 +19,6 @@ extends Control
 @onready var completion_toast: PanelContainer = %CompletionToast
 @onready var completion_label: Label = $CompletionToast/Label
 
-
-const CACTUS_LEFT_X: float = 430.0
-const CACTUS_RIGHT_X: float = 900.0
-const CACTUS_Y: float = 480.0
-const CACTUS_SPEED: float = 110.0
 
 const LEVEL_PATHS: Array = [
 	"res://scenes/living_room.tscn",
@@ -39,8 +35,6 @@ const LEVEL_NAMES: Array = [
 ]
 
 
-var _cactus_dir: int = -1
-var _cactus_attacking: bool = false
 var _attack_timer: float = 0.0
 var _toast_tween: Tween = null
 
@@ -69,48 +63,42 @@ func _ready() -> void:
 	t2.tween_property(press_hint, "modulate:a", 0.25, 0.7)
 	t2.tween_property(press_hint, "modulate:a", 1.0, 0.7)
 
-	# Cactus starts on the right walking left
-	cactus.position = Vector2(CACTUS_RIGHT_X, CACTUS_Y)
-	cactus.flip_h = true
-	cactus.play("walk")
-	cactus.animation_finished.connect(_on_cactus_anim_finished)
+	# Both cacti play walk animation
+	cactus_left.play("walk")
+	cactus_right.play("walk")
+	cactus_left.animation_finished.connect(_on_cactus_left_anim_finished)
+	cactus_right.animation_finished.connect(_on_cactus_right_anim_finished)
 
 	_show_pending_completion_message()
 
 
 func _process(delta: float) -> void:
-	if _cactus_attacking:
-		return
-
-	cactus.position.x += _cactus_dir * CACTUS_SPEED * delta
-
-	if cactus.position.x <= CACTUS_LEFT_X:
-		cactus.position.x = CACTUS_LEFT_X
-		_cactus_dir = 1
-		cactus.flip_h = false
-	elif cactus.position.x >= CACTUS_RIGHT_X:
-		cactus.position.x = CACTUS_RIGHT_X
-		_cactus_dir = -1
-		cactus.flip_h = true
-
 	_attack_timer += delta
 	if _attack_timer > 3.5:
 		_attack_timer = 0.0
-		_start_attack()
+		_do_attack()
 
 
-func _start_attack() -> void:
-	_cactus_attacking = true
-	cactus.play("attack")
-	var t := create_tween()
-	t.tween_property(cactus, "scale", Vector2(3.8, 3.8), 0.12)
-	t.tween_property(cactus, "scale", Vector2(3.2, 3.2), 0.18)
+func _do_attack() -> void:
+	# Both cacti attack simultaneously
+	cactus_left.play("attack")
+	cactus_right.play("attack")
+	var tl := create_tween()
+	tl.tween_property(cactus_left, "scale", Vector2(3.4, 3.4), 0.12)
+	tl.tween_property(cactus_left, "scale", Vector2(2.8, 2.8), 0.18)
+	var tr := create_tween()
+	tr.tween_property(cactus_right, "scale", Vector2(3.4, 3.4), 0.12)
+	tr.tween_property(cactus_right, "scale", Vector2(2.8, 2.8), 0.18)
 
 
-func _on_cactus_anim_finished() -> void:
-	if cactus.animation == "attack":
-		_cactus_attacking = false
-		cactus.play("walk")
+func _on_cactus_left_anim_finished() -> void:
+	if cactus_left.animation == "attack":
+		cactus_left.play("walk")
+
+
+func _on_cactus_right_anim_finished() -> void:
+	if cactus_right.animation == "attack":
+		cactus_right.play("walk")
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -24,7 +24,8 @@ const MEDIUM_ACTIVE_TIME: float = 0.22
 const MEDIUM_COOLDOWN: float = 1.55
 
 const RANGED_DAMAGE: int = 12
-const RANGED_COOLDOWN: float = 1.35
+const RANGED_COOLDOWN_P1: float = 2.8
+const RANGED_COOLDOWN_P2: float = 1.2
 
 const COCONUT_SCENE: PackedScene = preload("res://scenes/coconut_projectile.tscn")
 
@@ -81,20 +82,32 @@ func _physics_process(delta: float) -> void:
 	var distance := global_position.distance_to(target.global_position)
 	var speed := PHASE2_SPEED if _phase2 else PHASE1_SPEED
 
-	# Phase 2: add a ranged homing coconut.
-	if _phase2 and _ranged_cooldown_left <= 0.0 and distance > MELEE_TRIGGER_RANGE:
+	# Coconut ranged attack (both phases, faster in phase 2)
+	if _ranged_cooldown_left <= 0.0 and distance > MELEE_TRIGGER_RANGE:
 		_spawn_coconut()
-		_ranged_cooldown_left = RANGED_COOLDOWN
+		_ranged_cooldown_left = RANGED_COOLDOWN_P2 if _phase2 else RANGED_COOLDOWN_P1
 
 	# Phase 1+2: melee and medium-range attacks.
+	var direction := (target.global_position - global_position).normalized()
+
 	if distance <= MELEE_TRIGGER_RANGE:
-		velocity = Vector2.ZERO
-		_try_melee()
+		if _melee_cooldown_left <= 0.0 and not _is_attacking:
+			velocity = Vector2.ZERO
+			_try_melee()
+		elif _medium_cooldown_left <= 0.0 and not _is_attacking:
+			velocity = Vector2.ZERO
+			_try_medium()
+		else:
+			# Stay close but don't run through the player
+			velocity = Vector2.ZERO
 	elif distance <= MEDIUM_TRIGGER_RANGE:
-		velocity = Vector2.ZERO
-		_try_medium()
+		if _medium_cooldown_left <= 0.0 and not _is_attacking:
+			velocity = Vector2.ZERO
+			_try_medium()
+		else:
+			# Keep approaching while medium is on cooldown
+			velocity = direction * speed
 	else:
-		var direction := (target.global_position - global_position).normalized()
 		velocity = direction * speed
 
 	move_and_slide()
@@ -111,10 +124,14 @@ func _try_melee() -> void:
 
 
 func _do_melee() -> void:
+	# Windup: shake and turn red
+	_anim_windup()
 	await get_tree().create_timer(MELEE_WINDUP).timeout
 	if not is_alive:
 		_is_attacking = false
 		return
+	# Slam: flash white + spawn ground impact ring
+	_anim_melee_slam()
 	melee_hitbox.monitoring = true
 	await get_tree().create_timer(MELEE_ACTIVE_TIME).timeout
 	melee_hitbox.monitoring = false
@@ -132,10 +149,14 @@ func _try_medium() -> void:
 
 
 func _do_medium() -> void:
+	# Windup: shake
+	_anim_windup()
 	await get_tree().create_timer(MEDIUM_WINDUP).timeout
 	if not is_alive:
 		_is_attacking = false
 		return
+	# Leaf whip: green expanding ring
+	_anim_leaf_whip()
 	medium_hitbox.monitoring = true
 	await get_tree().create_timer(MEDIUM_ACTIVE_TIME).timeout
 	medium_hitbox.monitoring = false
@@ -155,12 +176,73 @@ func _spawn_coconut() -> void:
 	else:
 		get_parent().add_child(coconut)
 
-	coconut.global_position = global_position
+	# Spawn slightly offset from boss center so it clears the body
 	var dir := (target.global_position - global_position).normalized()
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
+	coconut.global_position = global_position + dir * 50.0
 	if coconut.has_method("setup"):
-		coconut.setup(target, dir, RANGED_DAMAGE)
+		coconut.setup(target, dir, RANGED_DAMAGE, self)
+
+
+## ── Attack animation helpers ──────────────────────────────────────────
+
+func _anim_windup() -> void:
+	# Quick shake left-right during windup
+	var orig_pos := sprite.position
+	var tw := create_tween()
+	tw.tween_property(sprite, "position", orig_pos + Vector2(-4, 0), 0.03)
+	tw.tween_property(sprite, "position", orig_pos + Vector2(4, 0), 0.03)
+	tw.tween_property(sprite, "position", orig_pos + Vector2(-3, 0), 0.03)
+	tw.tween_property(sprite, "position", orig_pos, 0.03)
+	# Tint slightly red during windup
+	sprite.modulate = Color(1.3, 0.7, 0.7, 1.0)
+	var color_tw := create_tween()
+	color_tw.tween_property(sprite, "modulate", Color.WHITE, 0.15)
+
+
+func _anim_melee_slam() -> void:
+	# Flash white on impact
+	sprite.modulate = Color(2.0, 2.0, 2.0, 1.0)
+	var tw := create_tween()
+	tw.tween_property(sprite, "modulate", Color.WHITE, 0.15)
+	# Ground slam ring (red expanding circle)
+	_spawn_impact_ring(Color(0.9, 0.2, 0.1, 0.7), MELEE_TRIGGER_RANGE)
+
+
+func _anim_leaf_whip() -> void:
+	# Flash green on leaf whip
+	sprite.modulate = Color(0.5, 1.5, 0.5, 1.0)
+	var tw := create_tween()
+	tw.tween_property(sprite, "modulate", Color.WHITE, 0.2)
+	# Leaf whip ring (green expanding circle)
+	_spawn_impact_ring(Color(0.2, 0.8, 0.1, 0.6), MEDIUM_TRIGGER_RANGE)
+
+
+func _spawn_impact_ring(color: Color, max_radius: float) -> void:
+	# Create a visual ring that expands and fades out
+	var ring := Node2D.new()
+	ring.global_position = global_position
+	ring.z_index = -1
+	get_tree().current_scene.add_child(ring)
+
+	var circle := Polygon2D.new()
+	# Build circle polygon (16 segments)
+	var points := PackedVector2Array()
+	for i in range(16):
+		var angle := i * TAU / 16.0
+		points.append(Vector2(cos(angle), sin(angle)) * 8.0)
+	circle.polygon = points
+	circle.color = color
+	ring.add_child(circle)
+
+	# Animate: expand scale and fade out
+	var tw := ring.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(ring, "scale", Vector2.ONE * (max_radius / 8.0), 0.25).set_ease(Tween.EASE_OUT)
+	tw.tween_property(circle, "color:a", 0.0, 0.3)
+	tw.set_parallel(false)
+	tw.tween_callback(ring.queue_free)
 
 
 func _on_melee_hitbox_body_entered(body: Node2D) -> void:

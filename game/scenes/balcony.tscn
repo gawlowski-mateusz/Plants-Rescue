@@ -14,6 +14,11 @@
 [ext_resource type="PackedScene" path="res://scenes/water_bottles_pack.tscn" id="13_sink"]
 [ext_resource type="PackedScene" path="res://scenes/boss_palm.tscn" id="16_boss_palm"]
 [ext_resource type="PackedScene" path="res://scenes/medkit_pickup.tscn" id="14_medkit"]
+[ext_resource type="Texture2D" path="res://assets/images/furniture/balcony_bench.png" id="20_bench"]
+[ext_resource type="Texture2D" path="res://assets/images/furniture/balcony_planter.png" id="21_planter"]
+[ext_resource type="Texture2D" path="res://assets/images/furniture/bedroom_desk.png" id="22_desk"]
+[ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_bookshelf.png" id="23_bookshelf"]
+[ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_tv_cabinet.png" id="24_tv"]
 
 [sub_resource type="RectangleShape2D" id="RS_wall_horiz"]
 size = Vector2(2400, 100)
@@ -22,31 +27,40 @@ size = Vector2(2400, 100)
 size = Vector2(110, 1200)
 
 [sub_resource type="RectangleShape2D" id="RS_couch"]
-size = Vector2(80, 44)
+size = Vector2(200, 100)
 
 [sub_resource type="RectangleShape2D" id="RS_coffee"]
-size = Vector2(160, 80)
+size = Vector2(180, 100)
 
 [sub_resource type="RectangleShape2D" id="RS_bookshelf"]
-size = Vector2(80, 200)
+size = Vector2(100, 220)
 
 [sub_resource type="RectangleShape2D" id="RS_tv"]
-size = Vector2(180, 60)
+size = Vector2(200, 80)
 
 [sub_resource type="RectangleShape2D" id="RS_dining"]
-size = Vector2(140, 100)
+size = Vector2(200, 140)
 
 [sub_resource type="RectangleShape2D" id="RS_gaming_desk"]
-size = Vector2(420, 90)
+size = Vector2(500, 110)
 
 [sub_resource type="RectangleShape2D" id="RS_bed"]
-size = Vector2(220, 140)
+size = Vector2(260, 170)
 
 [sub_resource type="RectangleShape2D" id="RS_chair"]
-size = Vector2(60, 60)
+size = Vector2(80, 80)
 
 [sub_resource type="RectangleShape2D" id="RS_pctower"]
-size = Vector2(44, 100)
+size = Vector2(60, 120)
+
+[sub_resource type="RectangleShape2D" id="RS_inner_wall_v"]
+size = Vector2(30, 600)
+
+[sub_resource type="RectangleShape2D" id="RS_bench"]
+size = Vector2(200, 80)
+
+[sub_resource type="RectangleShape2D" id="RS_planter"]
+size = Vector2(100, 100)
 
 [sub_resource type="RectangleShape2D" id="RS_finish"]
 size = Vector2(120, 120)
@@ -64,44 +78,52 @@ border_width_bottom = 4
 border_color = Color(0.85, 0.7, 0.3, 1)
 
 [node name="GamingRoom" type="Node2D" unique_id=442478241]
+y_sort_enabled = true
 script = ExtResource("10_lr")
 next_scene_path = ""
 show_onboarding_tutorials = false
 
 [node name="Floor" type="ColorRect" parent="." unique_id=2080300858]
+z_index = -10
 offset_right = 2400.0
 offset_bottom = 1200.0
 color = Color(0.18, 0.16, 0.22, 1)
 
 [node name="FloorPattern" type="Sprite2D" parent="." unique_id=608009865]
+z_index = -10
 modulate = Color(1, 1, 1, 0.25)
 position = Vector2(1200, 600)
 scale = Vector2(18.75, 9.375)
 texture = ExtResource("8_floor")
 
 [node name="WallTopStrip" type="ColorRect" parent="." unique_id=915049256]
+z_index = -5
 offset_right = 2400.0
 offset_bottom = 110.0
 color = Color(0.5, 0.38, 0.26, 1)
 
 [node name="WallBotStrip" type="ColorRect" parent="." unique_id=923703533]
+z_index = -10
 offset_top = 1090.0
 offset_right = 2400.0
 offset_bottom = 1200.0
 color = Color(0.5, 0.38, 0.26, 1)
 
 [node name="WallLeftStrip" type="ColorRect" parent="." unique_id=1851035189]
+z_index = -10
 offset_right = 110.0
 offset_bottom = 1200.0
 color = Color(0.55, 0.42, 0.3, 1)
 
 [node name="WallRightTopStrip" type="ColorRect" parent="." unique_id=1141801076]
+z_index = -10
 offset_left = 2290.0
 offset_right = 2400.0
 offset_bottom = 700.0
 color = Color(0.55, 0.42, 0.3, 1)
 
 [node name="WallRightBotStrip" type="ColorRect" parent="." unique_id=892200166]
+z_index = -10
 offset_left = 2290.0
 offset_top = 820.0
 offset_right = 2400.0
@@ -109,6 +131,7 @@ offset_bottom = 1200.0
 color = Color(0.55, 0.42, 0.3, 1)
 
 [node name="Walls" type="Node2D" parent="." unique_id=560339576]
+z_index = -10
 
 [node name="WallTop" type="StaticBody2D" parent="Walls" unique_id=650254280]
 collision_layer = 3
@@ -151,128 +174,29 @@ position = Vector2(2345, 1010)
 shape = SubResource("RS_wall_vert")
 
 [node name="Furniture" type="Node2D" parent="." unique_id=1612589656]
+y_sort_enabled = true
 
-[node name="Couch1" type="StaticBody2D" parent="Furniture" unique_id=1838081435]
-position = Vector2(540, 480)
+; === INNER WALL - separates gaming zone (left) from chill/sleep zone (right) ===
+[node name="DividerVert" type="StaticBody2D" parent="Furniture"]
+position = Vector2(1550, 400)
 collision_layer = 3
 collision_mask = 0
 
-[node name="Sprite2D" type="Sprite2D" parent="Furniture/Couch1" unique_id=58835486]
-scale = Vector2(2, 2)
-texture = ExtResource("7_couch")
+[node name="Visual" type="ColorRect" parent="Furniture/DividerVert"]
+offset_left = -15.0
+offset_top = -300.0
+offset_right = 15.0
+offset_bottom = 300.0
+color = Color(0.15, 0.12, 0.20, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Couch1" unique_id=1590204796]
-shape = SubResource("RS_couch")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/DividerVert"]
+shape = SubResource("RS_inner_wall_v")
 
-[node name="Couch2" type="StaticBody2D" parent="Furniture" unique_id=2116914984]
-position = Vector2(1480, 620)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Sprite2D" type="Sprite2D" parent="Furniture/Couch2" unique_id=1901849064]
-scale = Vector2(2, 2)
-texture = ExtResource("7_couch")
-flip_h = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Couch2" unique_id=864381670]
-shape = SubResource("RS_couch")
-
-[node name="CoffeeTable" type="StaticBody2D" parent="Furniture" unique_id=2105623442]
-position = Vector2(1100, 500)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Top" type="ColorRect" parent="Furniture/CoffeeTable" unique_id=1046812810]
-offset_left = -80.0
-offset_top = -40.0
-offset_right = 80.0
-offset_bottom = 40.0
-color = Color(0.4, 0.25, 0.12, 1)
-
-[node name="Trim" type="ColorRect" parent="Furniture/CoffeeTable" unique_id=1046942639]
-offset_left = -76.0
-offset_top = -36.0
-offset_right = 76.0
-offset_bottom = 36.0
-color = Color(0.55, 0.35, 0.18, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/CoffeeTable" unique_id=1914716839]
-shape = SubResource("RS_coffee")
-
-[node name="Bookshelf" type="StaticBody2D" parent="Furniture" unique_id=1616966136]
-position = Vector2(250, 280)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Bg" type="ColorRect" parent="Furniture/Bookshelf" unique_id=1033809103]
-offset_left = -40.0
-offset_top = -100.0
-offset_right = 40.0
-offset_bottom = 100.0
-color = Color(0.3, 0.18, 0.08, 1)
-
-[node name="Shelf1" type="ColorRect" parent="Furniture/Bookshelf" unique_id=1728456016]
-offset_left = -36.0
-offset_top = -90.0
-offset_right = 36.0
-offset_bottom = -65.0
-color = Color(0.62, 0.28, 0.22, 1)
-
-[node name="Shelf2" type="ColorRect" parent="Furniture/Bookshelf" unique_id=139092036]
-offset_left = -36.0
-offset_top = -55.0
-offset_right = 36.0
-offset_bottom = -30.0
-color = Color(0.35, 0.5, 0.55, 1)
-
-[node name="Shelf3" type="ColorRect" parent="Furniture/Bookshelf" unique_id=1851836402]
-offset_left = -36.0
-offset_top = -20.0
-offset_right = 36.0
-offset_bottom = 5.0
-color = Color(0.7, 0.55, 0.22, 1)
-
-[node name="Shelf4" type="ColorRect" parent="Furniture/Bookshelf" unique_id=664645691]
-offset_left = -36.0
-offset_top = 15.0
-offset_right = 36.0
-offset_bottom = 40.0
-color = Color(0.45, 0.3, 0.3, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Bookshelf" unique_id=883635809]
-shape = SubResource("RS_bookshelf")
-
-[node name="TVCabinet" type="StaticBody2D" parent="Furniture" unique_id=1217341655]
-position = Vector2(1400, 200)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Cabinet" type="ColorRect" parent="Furniture/TVCabinet" unique_id=1393104989]
-offset_left = -90.0
-offset_top = -30.0
-offset_right = 90.0
-offset_bottom = 30.0
-color = Color(0.28, 0.16, 0.08, 1)
-
-[node name="Screen" type="ColorRect" parent="Furniture/TVCabinet" unique_id=1449195562]
-offset_left = -70.0
-offset_top = -22.0
-offset_right = 70.0
-offset_bottom = 18.0
-color = Color(0.08, 0.1, 0.14, 1)
-
-[node name="Glow" type="ColorRect" parent="Furniture/TVCabinet" unique_id=1553587970]
-offset_left = -66.0
-offset_top = -18.0
-offset_right = 66.0
-offset_bottom = 14.0
-color = Color(0.55, 0.30, 0.85, 0.55)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/TVCabinet" unique_id=2013621311]
-shape = SubResource("RS_tv")
-
+; === LEFT ZONE: Gaming setup ===
+; Gaming desk against top wall - scaled up 1.3x
 [node name="GamingDesk" type="StaticBody2D" parent="Furniture" unique_id=1391777374]
-position = Vector2(900, 230)
+position = Vector2(700, 220)
+scale = Vector2(1.3, 1.3)
 collision_layer = 3
 collision_mask = 0
 
@@ -363,8 +287,10 @@ color = Color(0.18, 0.10, 0.25, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/GamingDesk" unique_id=1045744912]
 shape = SubResource("RS_gaming_desk")
 
+; PC Tower next to desk on the right side - scaled up
 [node name="PCTower" type="StaticBody2D" parent="Furniture"]
-position = Vector2(1180, 270)
+position = Vector2(1100, 260)
+scale = Vector2(1.4, 1.4)
 collision_layer = 3
 collision_mask = 0
 
@@ -406,8 +332,10 @@ color = Color(0.5, 1.0, 0.4, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/PCTower"]
 shape = SubResource("RS_pctower")
 
+; Gaming chair in front of desk - scaled up
 [node name="GamingChair" type="StaticBody2D" parent="Furniture"]
-position = Vector2(900, 360)
+position = Vector2(700, 400)
+scale = Vector2(1.4, 1.4)
 collision_layer = 3
 collision_mask = 0
 
@@ -442,8 +370,41 @@ color = Color(0.65, 0.10, 0.20, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/GamingChair"]
 shape = SubResource("RS_chair")
 
+; Bookshelf against left wall
+[node name="Bookshelf" type="StaticBody2D" parent="Furniture" unique_id=1616966136]
+position = Vector2(200, 600)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="Furniture/Bookshelf"]
+scale = Vector2(2.2, 2.2)
+texture = ExtResource("23_bookshelf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Bookshelf" unique_id=883635809]
+shape = SubResource("RS_bookshelf")
+
+; Gaming rug under desk/chair area
+[node name="Rug" type="ColorRect" parent="Furniture" unique_id=1622226944]
+z_index = -1
+offset_left = 400.0
+offset_top = 350.0
+offset_right = 1100.0
+offset_bottom = 650.0
+color = Color(0.10, 0.06, 0.18, 1)
+
+[node name="RugTrim" type="ColorRect" parent="Furniture"]
+z_index = -1
+offset_left = 400.0
+offset_top = 350.0
+offset_right = 1100.0
+offset_bottom = 360.0
+color = Color(0.55, 0.30, 0.85, 1)
+
+; === RIGHT ZONE: Chill/sleep area ===
+; Bed against top-right wall - bigger
 [node name="Bed" type="StaticBody2D" parent="Furniture"]
-position = Vector2(2030, 320)
+position = Vector2(2000, 280)
+scale = Vector2(1.3, 1.3)
 collision_layer = 3
 collision_mask = 0
 
@@ -492,28 +453,67 @@ color = Color(0.75, 0.72, 0.68, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Bed"]
 shape = SubResource("RS_bed")
 
+; TV against right wall below bed
+[node name="TVCabinet" type="StaticBody2D" parent="Furniture" unique_id=1217341655]
+position = Vector2(2100, 600)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="Furniture/TVCabinet"]
+scale = Vector2(2, 2)
+texture = ExtResource("24_tv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/TVCabinet" unique_id=2013621311]
+shape = SubResource("RS_tv")
+
+; Bench in chill area
+[node name="Bench" type="StaticBody2D" parent="Furniture" unique_id=1838081435]
+position = Vector2(1800, 650)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="Furniture/Bench" unique_id=58835486]
+scale = Vector2(2, 2)
+texture = ExtResource("20_bench")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Bench" unique_id=1590204796]
+shape = SubResource("RS_bench")
+
+; Planter in right zone corner
+[node name="Planter" type="StaticBody2D" parent="Furniture" unique_id=2116914984]
+position = Vector2(1700, 200)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="Furniture/Planter" unique_id=1901849064]
+scale = Vector2(2, 2)
+texture = ExtResource("21_planter")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Planter" unique_id=864381670]
+shape = SubResource("RS_planter")
+
+; Small desk/side table in chill zone
+[node name="SideTable" type="StaticBody2D" parent="Furniture" unique_id=2105623442]
+position = Vector2(1800, 900)
+collision_layer = 3
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="Furniture/SideTable"]
+scale = Vector2(1.8, 1.8)
+texture = ExtResource("22_desk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/SideTable" unique_id=1914716839]
+shape = SubResource("RS_coffee")
+
+; Water bottles in lower gaming area
 [node name="WaterBottlesPack" parent="Furniture" unique_id=1140651688 instance=ExtResource("13_sink")]
-position = Vector2(2160, 1014)
-rotation = 3.1415927
-
-[node name="Rug" type="ColorRect" parent="Furniture" unique_id=1622226944]
-offset_left = 880.0
-offset_top = 440.0
-offset_right = 1380.0
-offset_bottom = 720.0
-color = Color(0.10, 0.06, 0.18, 1)
-
-[node name="RugTrim" type="ColorRect" parent="Furniture"]
-offset_left = 880.0
-offset_top = 440.0
-offset_right = 1380.0
-offset_bottom = 448.0
-color = Color(0.55, 0.30, 0.85, 1)
+position = Vector2(400, 960)
 
 [node name="Decor" type="Node2D" parent="."]
+z_index = -1
 
 [node name="ClothesPile1" type="Node2D" parent="Decor"]
-position = Vector2(430, 720)
+position = Vector2(350, 700)
 
 [node name="Pile1_Shirt" type="ColorRect" parent="Decor/ClothesPile1"]
 offset_left = -40.0
@@ -537,7 +537,7 @@ offset_bottom = -16.0
 color = Color(0.95, 0.94, 0.90, 1)
 
 [node name="ClothesPile2" type="Node2D" parent="Decor"]
-position = Vector2(1400, 780)
+position = Vector2(1300, 800)
 
 [node name="Pile2_Jeans" type="ColorRect" parent="Decor/ClothesPile2"]
 offset_left = -50.0
@@ -609,7 +609,7 @@ offset_bottom = -1.0
 color = Color(0.55, 0.30, 0.85, 1)
 
 [node name="PizzaBox" type="Node2D" parent="Decor"]
-position = Vector2(1100, 380)
+position = Vector2(500, 600)
 
 [node name="Pizza_Box" type="ColorRect" parent="Decor/PizzaBox"]
 offset_left = -28.0
@@ -633,7 +633,7 @@ offset_bottom = -4.0
 color = Color(0.75, 0.18, 0.18, 1)
 
 [node name="EnergyDrink1" type="Node2D" parent="Decor"]
-position = Vector2(1340, 350)
+position = Vector2(950, 550)
 
 [node name="Drink1_Can" type="ColorRect" parent="Decor/EnergyDrink1"]
 offset_left = -8.0
@@ -657,7 +657,7 @@ offset_bottom = 4.0
 color = Color(0.04, 0.04, 0.06, 1)
 
 [node name="EnergyDrink2" type="Node2D" parent="Decor"]
-position = Vector2(870, 470)
+position = Vector2(600, 550)
 rotation = 1.2
 
 [node name="Drink2_Can" type="ColorRect" parent="Decor/EnergyDrink2"]
@@ -677,12 +677,12 @@ color = Color(0.04, 0.04, 0.06, 1)
 [node name="Pickups" type="Node2D" parent="." unique_id=1333128997]
 
 [node name="Medkit" parent="Pickups" instance=ExtResource("14_medkit")]
-position = Vector2(1200, 980)
+position = Vector2(1400, 800)
 
 [node name="Doors" type="Node2D" parent="." unique_id=859804174]
 
 [node name="Door2" parent="Doors" unique_id=1122864134 instance=ExtResource("6_door")]
-position = Vector2(2290, 760)
+position = Vector2(2345, 760)
 door_id = "door2"
 
 [node name="FinishTrigger" type="Area2D" parent="." unique_id=1869913763]
@@ -693,36 +693,38 @@ collision_layer = 0
 shape = SubResource("RS_finish")
 
 [node name="Enemies" type="Node2D" parent="." unique_id=690777025]
+y_sort_enabled = true
 
 [node name="Slime1" parent="Enemies" unique_id=1889636774 instance=ExtResource("2_slime")]
-position = Vector2(640, 920)
+position = Vector2(400, 800)
 scale = Vector2(2, 2)
 
 [node name="Slime2" parent="Enemies" unique_id=768106268 instance=ExtResource("2_slime")]
-position = Vector2(1480, 380)
+position = Vector2(1000, 700)
 scale = Vector2(2, 2)
 
 [node name="Slime3" parent="Enemies" unique_id=1724892630 instance=ExtResource("2_slime")]
-position = Vector2(1880, 600)
+position = Vector2(1900, 500)
 scale = Vector2(2, 2)
 
 [node name="Slime4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_slime")]
-position = Vector2(1300, 950)
+position = Vector2(1700, 950)
 scale = Vector2(2, 2)
 
 [node name="BossPalm" parent="Enemies" instance=ExtResource("16_boss_palm")]
-position = Vector2(2000, 820)
+position = Vector2(2000, 900)
 
 [node name="Plants" type="Node2D" parent="." unique_id=1947606980]
+y_sort_enabled = true
 
 [node name="Plant1" parent="Plants" unique_id=1513850101 instance=ExtResource("3_plant")]
-position = Vector2(420, 880)
+position = Vector2(250, 800)
 
 [node name="Plant2" parent="Plants" unique_id=1989922575 instance=ExtResource("3_plant")]
-position = Vector2(1100, 880)
+position = Vector2(1100, 800)
 
 [node name="Plant3" parent="Plants" unique_id=1435150276 instance=ExtResource("3_plant")]
-position = Vector2(1700, 950)
+position = Vector2(2100, 400)
 
 [node name="Player" parent="." unique_id=679024543 instance=ExtResource("1_player")]
 position = Vector2(250, 600)

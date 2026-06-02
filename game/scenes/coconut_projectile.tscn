@@ -1,9 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/coconut_projectile.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/images/coconut.png" id="2_coconut"]
 
 [sub_resource type="CircleShape2D" id="CS_coconut"]
-radius = 10.0
+radius = 12.0
 
 [node name="CoconutProjectile" type="Area2D"]
 collision_layer = 1
@@ -13,6 +14,5 @@ script = ExtResource("1_script")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CS_coconut")
 
-[node name="Body" type="Polygon2D" parent="."]
-color = Color(0.55, 0.36, 0.18, 1)
-polygon = PackedVector2Array(10, 0, 7, 7, 0, 10, -7, 7, -10, 0, -7, -7, 0, -10, 7, -7)
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_coconut")

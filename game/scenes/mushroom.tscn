@@ -1,0 +1,174 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enemies/Mushroom.png" id="1_mush"]
+[ext_resource type="Script" path="res://scripts/mushroom.gd" id="2_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/hit_enemy.mp3" id="3_audio"]
+[ext_resource type="PackedScene" path="res://scenes/health_bar.tscn" id="4_hbar"]
+
+; Mushroom.png 576x480 | frame 96x96 | 6 cols x 5 rows
+; row0=idle_south  row1=walk_south  row2=walk_east
+; row3=attack_south  row4=die_south
+
+; --- IDLE (row 0) ---
+[sub_resource type="AtlasTexture" id="AT_idle0"]
+atlas = ExtResource("1_mush")
+region = Rect2(0, 0, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_idle1"]
+atlas = ExtResource("1_mush")
+region = Rect2(96, 0, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_idle2"]
+atlas = ExtResource("1_mush")
+region = Rect2(192, 0, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_idle3"]
+atlas = ExtResource("1_mush")
+region = Rect2(288, 0, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_idle4"]
+atlas = ExtResource("1_mush")
+region = Rect2(384, 0, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_idle5"]
+atlas = ExtResource("1_mush")
+region = Rect2(480, 0, 96, 96)
+
+; --- WALK SOUTH (row 1) ---
+[sub_resource type="AtlasTexture" id="AT_ws0"]
+atlas = ExtResource("1_mush")
+region = Rect2(0, 96, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_ws1"]
+atlas = ExtResource("1_mush")
+region = Rect2(96, 96, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_ws2"]
+atlas = ExtResource("1_mush")
+region = Rect2(192, 96, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_ws3"]
+atlas = ExtResource("1_mush")
+region = Rect2(288, 96, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_ws4"]
+atlas = ExtResource("1_mush")
+region = Rect2(384, 96, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_ws5"]
+atlas = ExtResource("1_mush")
+region = Rect2(480, 96, 96, 96)
+
+; --- WALK EAST (row 2) ---
+[sub_resource type="AtlasTexture" id="AT_we0"]
+atlas = ExtResource("1_mush")
+region = Rect2(0, 192, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_we1"]
+atlas = ExtResource("1_mush")
+region = Rect2(96, 192, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_we2"]
+atlas = ExtResource("1_mush")
+region = Rect2(192, 192, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_we3"]
+atlas = ExtResource("1_mush")
+region = Rect2(288, 192, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_we4"]
+atlas = ExtResource("1_mush")
+region = Rect2(384, 192, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_we5"]
+atlas = ExtResource("1_mush")
+region = Rect2(480, 192, 96, 96)
+
+; --- ATTACK (row 3) ---
+[sub_resource type="AtlasTexture" id="AT_atk0"]
+atlas = ExtResource("1_mush")
+region = Rect2(0, 288, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_atk1"]
+atlas = ExtResource("1_mush")
+region = Rect2(96, 288, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_atk2"]
+atlas = ExtResource("1_mush")
+region = Rect2(192, 288, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_atk3"]
+atlas = ExtResource("1_mush")
+region = Rect2(288, 288, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_atk4"]
+atlas = ExtResource("1_mush")
+region = Rect2(384, 288, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_atk5"]
+atlas = ExtResource("1_mush")
+region = Rect2(480, 288, 96, 96)
+
+; --- DIE (row 4) ---
+[sub_resource type="AtlasTexture" id="AT_die0"]
+atlas = ExtResource("1_mush")
+region = Rect2(0, 384, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_die1"]
+atlas = ExtResource("1_mush")
+region = Rect2(96, 384, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_die2"]
+atlas = ExtResource("1_mush")
+region = Rect2(192, 384, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_die3"]
+atlas = ExtResource("1_mush")
+region = Rect2(288, 384, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_die4"]
+atlas = ExtResource("1_mush")
+region = Rect2(384, 384, 96, 96)
+[sub_resource type="AtlasTexture" id="AT_die5"]
+atlas = ExtResource("1_mush")
+region = Rect2(480, 384, 96, 96)
+
+[sub_resource type="SpriteFrames" id="SF_mushroom"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("AT_idle0")}, {"duration": 1.0, "texture": SubResource("AT_idle1")}, {"duration": 1.0, "texture": SubResource("AT_idle2")}, {"duration": 1.0, "texture": SubResource("AT_idle3")}, {"duration": 1.0, "texture": SubResource("AT_idle4")}, {"duration": 1.0, "texture": SubResource("AT_idle5")}],
+"loop": true, "name": &"idle", "speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AT_ws0")}, {"duration": 1.0, "texture": SubResource("AT_ws1")}, {"duration": 1.0, "texture": SubResource("AT_ws2")}, {"duration": 1.0, "texture": SubResource("AT_ws3")}, {"duration": 1.0, "texture": SubResource("AT_ws4")}, {"duration": 1.0, "texture": SubResource("AT_ws5")}],
+"loop": true, "name": &"walk_south", "speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AT_we0")}, {"duration": 1.0, "texture": SubResource("AT_we1")}, {"duration": 1.0, "texture": SubResource("AT_we2")}, {"duration": 1.0, "texture": SubResource("AT_we3")}, {"duration": 1.0, "texture": SubResource("AT_we4")}, {"duration": 1.0, "texture": SubResource("AT_we5")}],
+"loop": true, "name": &"walk_east", "speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AT_atk0")}, {"duration": 1.0, "texture": SubResource("AT_atk1")}, {"duration": 1.0, "texture": SubResource("AT_atk2")}, {"duration": 1.0, "texture": SubResource("AT_atk3")}, {"duration": 1.0, "texture": SubResource("AT_atk4")}, {"duration": 1.0, "texture": SubResource("AT_atk5")}],
+"loop": false, "name": &"attack", "speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AT_die0")}, {"duration": 1.0, "texture": SubResource("AT_die1")}, {"duration": 1.0, "texture": SubResource("AT_die2")}, {"duration": 1.0, "texture": SubResource("AT_die3")}, {"duration": 1.0, "texture": SubResource("AT_die4")}, {"duration": 1.0, "texture": SubResource("AT_die5")}],
+"loop": false, "name": &"die", "speed": 7.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RS_body"]
+size = Vector2(32, 24)
+
+[sub_resource type="CircleShape2D" id="CS_sight"]
+radius = 90.0
+
+[sub_resource type="CircleShape2D" id="CS_attack"]
+radius = 60.0
+
+[node name="Mushroom" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("2_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SF_mushroom")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RS_body")
+
+[node name="Sight" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sight"]
+shape = SubResource("CS_sight")
+
+[node name="AttackHitbox" type="Area2D" parent="."]
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
+shape = SubResource("CS_attack")
+
+[node name="TakeDamage" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_audio")
+pitch_scale = 3.0
+
+[node name="HealthBar" parent="." instance=ExtResource("4_hbar")]
+position = Vector2(-36, 52)
+scale = Vector2(4, 3)
+
+[connection signal="body_entered" from="AttackHitbox" to="." method="_on_attack_hitbox_body_entered"]
+[connection signal="body_exited" from="AttackHitbox" to="." method="_on_attack_hitbox_body_exited"]
+[connection signal="body_entered" from="Sight" to="." method="_on_sight_body_entered"]
+[connection signal="body_exited" from="Sight" to="." method="_on_sight_body_exited"]
