@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d4jdm8l0a68q3"]
 
 [ext_resource type="PackedScene" uid="uid://dftrpkfy22rxb" path="res://scenes/player.tscn" id="1_player"]
-[ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/slime.tscn" id="2_slime"]
+[ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/enemy_plant.tscn" id="2_enemy_plant"]
 [ext_resource type="PackedScene" uid="uid://c1lqeavef33s7" path="res://scenes/friendly_plant.tscn" id="3_plant"]
 [ext_resource type="PackedScene" path="res://scenes/water_tank_ui.tscn" id="4_watertank"]
 [ext_resource type="PackedScene" path="res://scenes/player_health_ui.tscn" id="5_healthui"]
@@ -341,19 +341,19 @@ shape = SubResource("RS_finish")
 [node name="Enemies" type="Node2D" parent="." unique_id=690777025]
 y_sort_enabled = true
 
-[node name="Slime1" parent="Enemies" unique_id=1889636774 instance=ExtResource("2_slime")]
+[node name="EnemyPlant1" parent="Enemies" unique_id=1889636774 instance=ExtResource("2_enemy_plant")]
 position = Vector2(850, 700)
 scale = Vector2(2, 2)
 
-[node name="Slime2" parent="Enemies" unique_id=768106268 instance=ExtResource("2_slime")]
+[node name="EnemyPlant2" parent="Enemies" unique_id=768106268 instance=ExtResource("2_enemy_plant")]
 position = Vector2(1450, 880)
 scale = Vector2(2, 2)
 
-[node name="Slime3" parent="Enemies" unique_id=1724892630 instance=ExtResource("2_slime")]
+[node name="EnemyPlant3" parent="Enemies" unique_id=1724892630 instance=ExtResource("2_enemy_plant")]
 position = Vector2(1700, 300)
 scale = Vector2(2, 2)
 
-[node name="Slime4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_slime")]
+[node name="EnemyPlant4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_enemy_plant")]
 position = Vector2(2050, 950)
 scale = Vector2(2, 2)
 

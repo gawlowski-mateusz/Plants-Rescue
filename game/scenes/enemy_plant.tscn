@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://n30k8ab5e7bs"]
 
 [ext_resource type="Texture2D" uid="uid://de2e8e5bl3jlt" path="res://assets/images/enemies/Cactus.png" id="1_371uh"]
-[ext_resource type="Script" uid="uid://dsn4hc756cvfu" path="res://scripts/slime.gd" id="1_p2gj0"]
+[ext_resource type="Script" uid="uid://dsn4hc756cvfu" path="res://scripts/enemy_plant.gd" id="1_p2gj0"]
 [ext_resource type="AudioStream" uid="uid://dm2rtp12bfgn2" path="res://assets/audio/hit_enemy.mp3" id="3_n6pvg"]
 [ext_resource type="PackedScene" uid="uid://bt4adovk3nmxy" path="res://scenes/health_bar.tscn" id="4_pjw23"]
 
@@ -155,7 +155,7 @@ radius = 71.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_6gpas"]
 radius = 26.0
 
-[node name="Slime" type="CharacterBody2D" unique_id=2013486051]
+[node name="EnemyPlant" type="CharacterBody2D" unique_id=2013486051]
 collision_layer = 3
 collision_mask = 1
 script = ExtResource("1_p2gj0")

@@ -12,7 +12,7 @@ const WATERED_CORRUPT_DELAY_SEC: float = 0.6
 const DIALOG_VISIBLE_SEC: float = 2.0
 const DIALOG_FADE_SEC: float = 0.25
 
-@export var corrupted_enemy_scene: PackedScene = preload("res://scenes/slime.tscn")
+@export var corrupted_enemy_scene: PackedScene = preload("res://scenes/enemy_plant.tscn")
 
 signal plant_fully_watered
 signal corrupted_into_enemy(enemy: Node2D)
