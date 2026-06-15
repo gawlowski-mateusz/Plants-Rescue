@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://rxm2eu2tgjaa"]
+
+[ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ending.gd" id="2_script"]
+
+[sub_resource type="StyleBoxFlat" id="SB_banner"]
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 14.0
+bg_color = Color(0, 0, 0, 0.55)
+
+[sub_resource type="StyleBoxFlat" id="SB_panel"]
+content_margin_left = 36.0
+content_margin_top = 22.0
+content_margin_right = 36.0
+content_margin_bottom = 22.0
+bg_color = Color(0.06, 0.05, 0.04, 0.86)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.7, 0.3, 1)
+anti_aliasing = false
+
+[node name="Ending" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_theme")
+script = ExtResource("2_script")
+
+[node name="BG" type="TextureRect" parent="."]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand_mode = 1
+stretch_mode = 0
+
+[node name="TopBanner" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("SB_banner")
+
+[node name="Title" type="Label" parent="TopBanner"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 56
+text = "ZAKOŃCZENIE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -440.0
+offset_top = -250.0
+offset_right = 440.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("SB_panel")
+
+[node name="VBox" type="VBoxContainer" parent="BottomPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Summary" type="Label" parent="BottomPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 24
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Stats" type="Label" parent="BottomPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.82, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = "Uratowane rośliny: 0        Zniszczone rośliny: 0"
+horizontal_alignment = 1
+
+[node name="BackBtn" type="Button" parent="BottomPanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Powrót do menu głównego"
