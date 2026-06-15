@@ -214,6 +214,13 @@ layout_mode = 2
 size_flags_horizontal = 4
 text = "Wybór poziomu"
 
+[node name="SettingsButton" type="Button" parent="CenterColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Ustawienia"
+
 [node name="QuitButton" type="Button" parent="CenterColumn"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 72)
@@ -301,6 +308,15 @@ custom_minimum_size = Vector2(420, 60)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "4. Pokój gamingowy"
+
+[node name="SecretLevelBtn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(420, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+text = "★ Sekretny poziom: Wąż"
 
 [node name="BackBtn" type="Button" parent="LevelSelectOverlay/Panel/VBox"]
 unique_name_in_owner = true

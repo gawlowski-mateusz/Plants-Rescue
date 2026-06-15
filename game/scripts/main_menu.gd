@@ -3,6 +3,7 @@ extends Control
 
 @onready var play_button: Button = %PlayButton
 @onready var level_select_button: Button = %LevelSelectButton
+@onready var settings_button: Button = %SettingsButton
 @onready var quit_button: Button = %QuitButton
 @onready var title: Label = %Title
 @onready var press_hint: Label = %PressHint
@@ -14,7 +15,14 @@ extends Control
 @onready var level2_btn: Button = %Level2Btn
 @onready var level3_btn: Button = %Level3Btn
 @onready var level4_btn: Button = %Level4Btn
+@onready var secret_level_btn: Button = %SecretLevelBtn
 @onready var back_btn: Button = %BackBtn
+
+
+const SETTINGS_OVERLAY_SCENE: PackedScene = preload("res://scenes/settings_overlay.tscn")
+const SNAKE_SCENE_PATH: String = "res://scenes/snake_minigame.tscn"
+
+var _settings_overlay: CanvasLayer = null
 
 @onready var completion_toast: PanelContainer = %CompletionToast
 @onready var completion_label: Label = $CompletionToast/Label
@@ -42,13 +50,25 @@ var _toast_tween: Tween = null
 func _ready() -> void:
 	play_button.pressed.connect(_start_new_game)
 	level_select_button.pressed.connect(_open_level_select)
+	settings_button.pressed.connect(_open_settings)
 	quit_button.pressed.connect(_quit_game)
 
 	level1_btn.pressed.connect(_play_level.bind(0))
 	level2_btn.pressed.connect(_play_level.bind(1))
 	level3_btn.pressed.connect(_play_level.bind(2))
 	level4_btn.pressed.connect(_play_level.bind(3))
+	secret_level_btn.pressed.connect(_play_secret_level)
 	back_btn.pressed.connect(_close_level_select)
+
+	_settings_overlay = SETTINGS_OVERLAY_SCENE.instantiate()
+	add_child(_settings_overlay)
+
+	# Click sound on every menu button.
+	for btn in [play_button, level_select_button, settings_button, quit_button,
+			level1_btn, level2_btn, level3_btn, level4_btn, secret_level_btn, back_btn]:
+		btn.pressed.connect(func() -> void: AudioManager.play_sfx("ui_click"))
+
+	AudioManager.play_music("menu_theme")
 
 	level_select_overlay.visible = false
 	completion_toast.visible = false
@@ -86,9 +106,9 @@ func _do_attack() -> void:
 	var tl := create_tween()
 	tl.tween_property(cactus_left, "scale", Vector2(3.4, 3.4), 0.12)
 	tl.tween_property(cactus_left, "scale", Vector2(2.8, 2.8), 0.18)
-	var tr := create_tween()
-	tr.tween_property(cactus_right, "scale", Vector2(3.4, 3.4), 0.12)
-	tr.tween_property(cactus_right, "scale", Vector2(2.8, 2.8), 0.18)
+	var tween_right := create_tween()
+	tween_right.tween_property(cactus_right, "scale", Vector2(3.4, 3.4), 0.12)
+	tween_right.tween_property(cactus_right, "scale", Vector2(2.8, 2.8), 0.18)
 
 
 func _on_cactus_left_anim_finished() -> void:
@@ -102,6 +122,11 @@ func _on_cactus_right_anim_finished() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# The settings overlay handles its own input (incl. closing on ui_cancel).
+	if _settings_overlay != null and _settings_overlay.has_method("is_open") \
+			and bool(_settings_overlay.call("is_open")):
+		return
+
 	if level_select_overlay.visible:
 		if event.is_action_pressed("ui_cancel"):
 			_close_level_select()
@@ -120,15 +145,42 @@ func _start_new_game() -> void:
 	var gs := get_node_or_null("/root/GameState")
 	if gs != null and gs.has_method("reset_run"):
 		gs.reset_run()
+	if gs != null and gs.has_method("start_campaign_run"):
+		gs.call("start_campaign_run")
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
 func _open_level_select() -> void:
+	_refresh_level_select()
 	level_select_overlay.visible = true
+
+
+func _refresh_level_select() -> void:
+	var gs := get_node_or_null("/root/GameState")
+	var level_btns: Array = [level1_btn, level2_btn, level3_btn, level4_btn]
+	for i in range(level_btns.size()):
+		var done := false
+		if gs != null and gs.has_method("is_level_completed"):
+			done = bool(gs.call("is_level_completed", String(LEVEL_PATHS[i]).get_file()))
+		level_btns[i].text = "%d. %s%s" % [i + 1, LEVEL_NAMES[i], " ✓" if done else ""]
+
+	var all_done := false
+	if gs != null and gs.has_method("are_all_levels_completed"):
+		all_done = bool(gs.call("are_all_levels_completed"))
+	secret_level_btn.visible = all_done
 
 
 func _close_level_select() -> void:
 	level_select_overlay.visible = false
+
+
+func _open_settings() -> void:
+	if _settings_overlay != null and _settings_overlay.has_method("open"):
+		_settings_overlay.call("open", false)
+
+
+func _play_secret_level() -> void:
+	get_tree().change_scene_to_file(SNAKE_SCENE_PATH)
 
 
 func _play_level(index: int) -> void:
