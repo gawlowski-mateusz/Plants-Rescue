@@ -12,13 +12,19 @@ const PROJECTILE_SPEED: float = 200.0
 
 @export var spore_projectile_scene: PackedScene = preload("res://scenes/spore_projectile.tscn")
 
+# Used as the level-2 mid-boss (bedroom), so it gets a boss-sized health pool.
+const MAX_HEALTH: int = 250
+
 var is_alive: bool = true
-var health: int = 80
+var health: int = MAX_HEALTH
 var target: Node2D = null
 var is_target_in_attack_range: bool = false
 var attack_cooldown_left: float = 0.0
 var is_being_knocked_back: bool = false
 var _is_attacking: bool = false
+# Once damaged while the player is in sight, it locks on and never gives up.
+var is_provoked: bool = false
+var _music_started: bool = false
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var take_damage_sound: AudioStreamPlayer2D = $TakeDamage
@@ -26,6 +32,8 @@ var _is_attacking: bool = false
 
 
 func _ready() -> void:
+	if health_bar != null and health_bar.has_method("set_max_health"):
+		health_bar.set_max_health(MAX_HEALTH)
 	animated_sprite_2d.animation_finished.connect(_on_animation_finished)
 
 
@@ -114,6 +122,9 @@ func take_damage(damage: int, attacker_position: Vector2) -> void:
 		take_damage_sound.play()
 		_flash_red()
 		_apply_knockback(attacker_position)
+		# Hurt while the player is detected -> aggro-lock: no escape from now on.
+		if is_instance_valid(target):
+			is_provoked = true
 
 
 func _flash_red() -> void:
@@ -140,6 +151,8 @@ func _die() -> void:
 	animated_sprite_2d.play("die")
 	take_damage_sound.pitch_scale = 0.5
 	take_damage_sound.play()
+	AudioManager.clear_boss_music()
+	AudioManager.play_sfx("boss_defeat")
 	velocity = Vector2.ZERO
 
 	$CollisionShape2D.set_deferred("disabled", true)
@@ -152,10 +165,16 @@ func _die() -> void:
 func _on_sight_body_entered(body: Node2D) -> void:
 	if body.name == "Player":
 		target = body
+		if not _music_started:
+			_music_started = true
+			AudioManager.play_boss_music("boss_mushroom")
 
 
 func _on_sight_body_exited(body: Node2D) -> void:
 	if body.name == "Player" and is_alive:
+		# A provoked mid-boss keeps chasing even after the player leaves the area.
+		if is_provoked:
+			return
 		target = null
 		is_target_in_attack_range = false
 		if not _is_attacking:

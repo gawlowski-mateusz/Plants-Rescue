@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/health_bar.tscn" id="4_health"]
 
 [sub_resource type="RectangleShape2D" id="RS_body"]
-size = Vector2(30, 28)
+size = Vector2(140, 150)
 
 [sub_resource type="CircleShape2D" id="CS_sight"]
 radius = 560.0

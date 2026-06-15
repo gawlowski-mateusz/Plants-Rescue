@@ -15,6 +15,9 @@ var target = null
 var is_target_in_attack_range: bool = false
 var attack_cooldown_left: float = 0.0
 var is_being_knocked_back: bool = false
+# Once the player damages this plant while inside its sight, it locks on and
+# chases relentlessly — leaving the sight area no longer makes it give up.
+var is_provoked: bool = false
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var take_damage_sound: AudioStreamPlayer2D = $TakeDamage
@@ -65,7 +68,7 @@ func _try_attack_target() -> void:
 		return
 
 	if target and target.has_method("take_damage"):
-		target.take_damage(attack_damage)
+		target.take_damage(attack_damage, global_position)
 
 	attack_cooldown_left = attack_interval
 
@@ -80,6 +83,9 @@ func take_damage(damage: int, attacker_position: Vector2):
 		take_damage_sound.play()
 		_flash_red()
 		_apply_knockback(attacker_position)
+		# Hurt while the player is detected -> aggro-lock: no escape from now on.
+		if is_instance_valid(target):
+			is_provoked = true
 
 
 func _flash_red() -> void:
@@ -106,6 +112,7 @@ func _die() -> void:
 	animated_sprite_2d.play("die")
 	take_damage_sound.pitch_scale = 0.5
 	take_damage_sound.play()
+	AudioManager.play_sfx("enemy_die")
 	velocity = Vector2.ZERO
 
 	# Disable collision
@@ -123,6 +130,9 @@ func _on_sight_body_entered(body: Node2D) -> void:
 
 func _on_sight_body_exited(body: Node2D) -> void:
 	if body.name == "Player" and is_alive:
+		# Provoked plants keep chasing even after the player leaves the sight area.
+		if is_provoked:
+			return
 		target = null
 		is_target_in_attack_range = false
 		animated_sprite_2d.play("idle")

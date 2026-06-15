@@ -4,7 +4,8 @@ extends CharacterBody2D
 signal died
 
 
-const PHASE2_HEALTH_THRESHOLD: int = 50
+const MAX_HEALTH: int = 300
+const PHASE2_HEALTH_THRESHOLD: int = MAX_HEALTH / 2
 
 const PHASE1_SPEED: float = 125.0
 const PHASE2_SPEED: float = 225.0
@@ -30,8 +31,11 @@ const RANGED_COOLDOWN_P2: float = 1.2
 const COCONUT_SCENE: PackedScene = preload("res://scenes/coconut_projectile.tscn")
 
 var is_alive: bool = true
-var health: int = 100
+var health: int = MAX_HEALTH
 var target: Node2D = null
+# Once damaged while the player is in sight, the boss locks on and never gives up.
+var is_provoked: bool = false
+var _music_started: bool = false
 
 var _phase2: bool = false
 var _is_being_knocked_back: bool = false
@@ -52,6 +56,8 @@ var _ranged_cooldown_left: float = 0.0
 func _ready() -> void:
 	melee_hitbox.monitoring = false
 	medium_hitbox.monitoring = false
+	if health_bar != null and health_bar.has_method("set_max_health"):
+		health_bar.set_max_health(MAX_HEALTH)
 
 	sight.body_entered.connect(_on_sight_body_entered)
 	sight.body_exited.connect(_on_sight_body_exited)
@@ -253,7 +259,7 @@ func _on_melee_hitbox_body_entered(body: Node2D) -> void:
 	if body.name != "Player":
 		return
 	if body.has_method("take_damage"):
-		body.take_damage(MELEE_DAMAGE)
+		body.take_damage(MELEE_DAMAGE, global_position)
 
 
 func _on_medium_hitbox_body_entered(body: Node2D) -> void:
@@ -264,7 +270,7 @@ func _on_medium_hitbox_body_entered(body: Node2D) -> void:
 	if body.name != "Player":
 		return
 	if body.has_method("take_damage"):
-		body.take_damage(MEDIUM_DAMAGE)
+		body.take_damage(MEDIUM_DAMAGE, global_position)
 
 
 func take_damage(damage: int, attacker_position: Vector2) -> void:
@@ -288,6 +294,9 @@ func take_damage(damage: int, attacker_position: Vector2) -> void:
 		take_damage_sound.play()
 	_flash_red()
 	_apply_knockback(attacker_position)
+	# Hurt while the player is detected -> aggro-lock: no escape from now on.
+	if is_instance_valid(target):
+		is_provoked = true
 
 
 func _flash_red() -> void:
@@ -314,6 +323,8 @@ func _die() -> void:
 	velocity = Vector2.ZERO
 	melee_hitbox.monitoring = false
 	medium_hitbox.monitoring = false
+	AudioManager.clear_boss_music()
+	AudioManager.play_sfx("boss_defeat")
 
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Sight/CollisionShape2D.set_deferred("disabled", true)
@@ -330,8 +341,14 @@ func _die() -> void:
 func _on_sight_body_entered(body: Node2D) -> void:
 	if body != null and body.name == "Player":
 		target = body
+		if not _music_started:
+			_music_started = true
+			AudioManager.play_boss_music("boss_palm")
 
 
 func _on_sight_body_exited(body: Node2D) -> void:
 	if body != null and body.name == "Player" and is_alive:
+		# A provoked boss keeps chasing even after the player leaves the area.
+		if is_provoked:
+			return
 		target = null

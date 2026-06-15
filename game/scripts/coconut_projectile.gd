@@ -46,13 +46,8 @@ func setup(new_target: Node2D, initial_direction: Vector2, new_damage: int = 12,
 
 
 func _physics_process(delta: float) -> void:
-	# Homing
-	if is_instance_valid(target):
-		var desired := (target.global_position - global_position).normalized()
-		if desired != Vector2.ZERO:
-			_direction = _direction.lerp(desired, clampf(turn_strength * delta, 0.0, 1.0)).normalized()
-
-	# Move
+	# Straight-line flight: the coconut is aimed at the player only at the moment
+	# it is fired (see setup); it no longer homes in on a moving target.
 	global_position += _direction * speed * delta
 
 	# Spin the visual
@@ -123,5 +118,5 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.name != "Player":
 		return
 	if body.has_method("take_damage"):
-		body.take_damage(damage)
+		body.take_damage(damage, global_position)
 	_explode()

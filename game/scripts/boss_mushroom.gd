@@ -11,9 +11,13 @@ const GAS_SLOW_MULTIPLIER: float = 0.55
 const GAS_TICK_INTERVAL: float = 0.75
 const GAS_DAMAGE_PER_TICK: int = 6
 
+const MAX_HEALTH: int = 250
+
 var is_alive: bool = true
-var health: int = 100
+var health: int = MAX_HEALTH
 var target: Node2D = null
+# Once damaged while the player is in sight, the boss locks on and never gives up.
+var is_provoked: bool = false
 
 var _is_being_knocked_back: bool = false
 var _gas_target: Node2D = null
@@ -27,6 +31,8 @@ var _gas_tick_left: float = GAS_TICK_INTERVAL
 
 
 func _ready() -> void:
+	if health_bar != null and health_bar.has_method("set_max_health"):
+		health_bar.set_max_health(MAX_HEALTH)
 	sight.body_entered.connect(_on_sight_body_entered)
 	sight.body_exited.connect(_on_sight_body_exited)
 	gas_area.body_entered.connect(_on_gas_body_entered)
@@ -89,6 +95,9 @@ func take_damage(damage: int, attacker_position: Vector2) -> void:
 		take_damage_sound.play()
 	_flash_red()
 	_apply_knockback(attacker_position)
+	# Hurt while the player is detected -> aggro-lock: no escape from now on.
+	if is_instance_valid(target):
+		is_provoked = true
 
 
 func _flash_red() -> void:
@@ -137,6 +146,9 @@ func _on_sight_body_entered(body: Node2D) -> void:
 
 func _on_sight_body_exited(body: Node2D) -> void:
 	if body != null and body.name == "Player" and is_alive:
+		# A provoked boss keeps chasing even after the player leaves the area.
+		if is_provoked:
+			return
 		target = null
 
 

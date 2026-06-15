@@ -25,7 +25,7 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player" and body.has_method("take_damage"):
-		body.take_damage(damage)
+		body.take_damage(damage, global_position)
 		queue_free()
 	elif body.collision_layer & 4:
 		# Hit a wall/furniture (layer 3 = bit 2 = value 4)

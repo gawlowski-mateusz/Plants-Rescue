@@ -6,15 +6,20 @@ signal died
 
 const SPEED: float = 210.0
 const KNOCKBACK_FORCE: float = 380.0
-const ATTACK_DAMAGE: int = 18
-const ATTACK_TRIGGER_RANGE: float = 125.0
+const ATTACK_DAMAGE: int = 27        # +50% (was 18)
+const ATTACK_TRIGGER_RANGE: float = 93.75  # -25% (was 125)
 const ATTACK_WINDUP: float = 0.12
 const ATTACK_ACTIVE_TIME: float = 0.18
 const ATTACK_COOLDOWN: float = 0.95
 
+const MAX_HEALTH: int = 200
+
 var is_alive: bool = true
-var health: int = 100
+var health: int = MAX_HEALTH
 var target: Node2D = null
+# Once damaged while the player is in sight, the boss locks on and never gives up.
+var is_provoked: bool = false
+var _music_started: bool = false
 
 var _attack_cooldown_left: float = 0.0
 var _is_attacking: bool = false
@@ -25,13 +30,17 @@ var _is_being_knocked_back: bool = false
 @onready var health_bar: Node2D = $HealthBar
 @onready var sight: Area2D = $Sight
 @onready var attack_hitbox: Area2D = $AttackHitbox
+@onready var spike_fx: AnimatedSprite2D = $SpikeFx
 
 
 func _ready() -> void:
 	attack_hitbox.monitoring = false
+	if health_bar != null and health_bar.has_method("set_max_health"):
+		health_bar.set_max_health(MAX_HEALTH)
 	sight.body_entered.connect(_on_sight_body_entered)
 	sight.body_exited.connect(_on_sight_body_exited)
 	attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
+	spike_fx.animation_finished.connect(_on_spike_fx_finished)
 
 
 func _physics_process(delta: float) -> void:
@@ -75,6 +84,11 @@ func _try_attack() -> void:
 
 
 func _do_attack() -> void:
+	# Spike-strike visual telegraph + hit.
+	spike_fx.visible = true
+	spike_fx.frame = 0
+	spike_fx.play("strike")
+
 	# Wind-up
 	await get_tree().create_timer(ATTACK_WINDUP).timeout
 	if not is_alive:
@@ -84,6 +98,10 @@ func _do_attack() -> void:
 	await get_tree().create_timer(ATTACK_ACTIVE_TIME).timeout
 	attack_hitbox.monitoring = false
 	_is_attacking = false
+
+
+func _on_spike_fx_finished() -> void:
+	spike_fx.visible = false
 
 
 func _on_attack_hitbox_body_entered(body: Node2D) -> void:
@@ -98,7 +116,7 @@ func _on_attack_hitbox_body_entered(body: Node2D) -> void:
 	if body.name != "Player":
 		return
 	if body.has_method("take_damage"):
-		body.take_damage(ATTACK_DAMAGE)
+		body.take_damage(ATTACK_DAMAGE, global_position)
 
 
 func take_damage(damage: int, attacker_position: Vector2) -> void:
@@ -117,6 +135,9 @@ func take_damage(damage: int, attacker_position: Vector2) -> void:
 		take_damage_sound.play()
 	_flash_red()
 	_apply_knockback(attacker_position)
+	# Hurt while the player is detected -> aggro-lock: no escape from now on.
+	if is_instance_valid(target):
+		is_provoked = true
 
 
 func _flash_red() -> void:
@@ -142,6 +163,8 @@ func _die() -> void:
 	is_alive = false
 	velocity = Vector2.ZERO
 	attack_hitbox.monitoring = false
+	AudioManager.clear_boss_music()
+	AudioManager.play_sfx("boss_defeat")
 
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Sight/CollisionShape2D.set_deferred("disabled", true)
@@ -157,8 +180,14 @@ func _die() -> void:
 func _on_sight_body_entered(body: Node2D) -> void:
 	if body != null and body.name == "Player":
 		target = body
+		if not _music_started:
+			_music_started = true
+			AudioManager.play_boss_music("boss_vine")
 
 
 func _on_sight_body_exited(body: Node2D) -> void:
 	if body != null and body.name == "Player" and is_alive:
+		# A provoked boss keeps chasing even after the player leaves the area.
+		if is_provoked:
+			return
 		target = null

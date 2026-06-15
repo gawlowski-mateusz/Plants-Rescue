@@ -128,7 +128,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RS_body"]
-size = Vector2(32, 24)
+size = Vector2(77, 86)
 
 [sub_resource type="CircleShape2D" id="CS_sight"]
 radius = 90.0
