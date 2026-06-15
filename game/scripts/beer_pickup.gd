@@ -40,4 +40,5 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if _player.has_method("add_beer"):
 		_player.call("add_beer", beer_amount)
+		AudioManager.play_sfx("pickup_beer")
 		queue_free()

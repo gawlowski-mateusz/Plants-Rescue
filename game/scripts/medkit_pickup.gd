@@ -37,6 +37,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		healed = bool(_player.call("heal_one_heart"))
 
 	if healed:
+		AudioManager.play_sfx("pickup_medkit")
 		get_viewport().set_input_as_handled()
 		queue_free()
 

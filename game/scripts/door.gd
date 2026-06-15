@@ -42,6 +42,7 @@ func open() -> void:
 	if _is_open:
 		return
 	_is_open = true
+	AudioManager.play_sfx("door_open")
 	# Remove physical blocker so player can pass through
 	blocker_shape.set_deferred("disabled", true)
 	# Opening animation: simply fade out
