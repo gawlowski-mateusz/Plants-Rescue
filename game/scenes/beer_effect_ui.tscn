@@ -17,12 +17,12 @@ border_color = Color(0.85, 0.70, 0.30, 1)
 anti_aliasing = false
 
 [sub_resource type="Shader" id="Shader_beer_blur"]
-code = "shader_type canvas_item;\n\nuniform sampler2D screen_texture : hint_screen_texture;\nuniform float strength : hint_range(0.0, 1.0) = 0.35;\nuniform float radius : hint_range(0.5, 6.0) = 1.5;\n\nvoid fragment() {\n\tvec2 ps = SCREEN_PIXEL_SIZE * radius;\n\tvec4 base = texture(screen_texture, SCREEN_UV);\t\n\tvec4 sum = base * 0.20;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, 0.0)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, 0.0)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, ps.y)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, -ps.y)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, ps.y)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, ps.y)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, -ps.y)) * 0.10;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, -ps.y)) * 0.10;\n\n\tvec4 blurred = sum;\n\tCOLOR = mix(base, blurred, strength);\n}\n"
+code = "shader_type canvas_item;\n\nuniform sampler2D screen_texture : hint_screen_texture;\nuniform float strength : hint_range(0.0, 1.0) = 0.9;\nuniform float radius : hint_range(0.5, 16.0) = 5.5;\n\nvoid fragment() {\n\tvec2 ps = SCREEN_PIXEL_SIZE * radius;\n\tvec2 ps2 = ps * 2.0;\n\tvec4 base = texture(screen_texture, SCREEN_UV);\n\tvec4 sum = base;\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, 0.0));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, 0.0));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, -ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps.x, -ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps.x, -ps.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps2.x, 0.0));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps2.x, 0.0));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, ps2.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(0.0, -ps2.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps2.x, ps2.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps2.x, ps2.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(ps2.x, -ps2.y));\n\tsum += texture(screen_texture, SCREEN_UV + vec2(-ps2.x, -ps2.y));\n\tvec4 blurred = sum / 17.0;\n\tCOLOR = mix(base, blurred, strength);\n}\n"
 
 [sub_resource type="ShaderMaterial" id="SM_beer_blur"]
 shader = SubResource("Shader_beer_blur")
-shader_parameter/strength = 0.6
-shader_parameter/radius = 2.8
+shader_parameter/strength = 0.9
+shader_parameter/radius = 5.5
 
 [node name="BeerEffectUI" type="Control"]
 anchors_preset = 15

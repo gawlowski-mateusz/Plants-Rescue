@@ -2,7 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://ctathnovu5d2t" path="res://assets/images/player/Player.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://bfx7naoqgcskq" path="res://scripts/player.gd" id="1_g2els"]
-[ext_resource type="AudioStream" uid="uid://bbrwwe2hjtvmw" path="res://assets/audio/whoosh.mp3" id="3_qhqgy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tuyoq"]
 atlas = ExtResource("1_3vyb7")
@@ -439,10 +438,6 @@ animation = &"dying"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2063646738]
 position = Vector2(-2, -5.5)
 shape = SubResource("RectangleShape2D_dqkch")
-
-[node name="SwingScissors" type="AudioStreamPlayer2D" parent="." unique_id=1270547037]
-stream = ExtResource("3_qhqgy")
-pitch_scale = 0.8
 
 [node name="Hitbox" type="Area2D" parent="." unique_id=14252756]
 position = Vector2(24, 0)

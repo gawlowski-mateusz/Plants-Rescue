@@ -18,6 +18,15 @@ const PIXEL_THEME: Theme = preload("res://assets/themes/pixel_theme.tres")
 const BEER_SPEED_MULTIPLIER: float = 1.5
 const BEER_EFFECT_DURATION: float = 10.0
 
+const KNOCKBACK_FORCE: float = 320.0
+const KNOCKBACK_TIME: float = 0.15
+# Throttles the hurt feedback (flash + knockback) so repeated/continuous damage
+# (e.g. the mushroom boss gas) neither strobes nor changes damage balance.
+const HURT_FEEDBACK_COOLDOWN: float = 0.35
+
+# Base reach of the scissors melee hitbox, multiplying the scene shape scale.
+const BASE_SCISSORS_RANGE_MULTIPLIER: float = 1.25
+
 enum ShotMode { WATER, ACID }
 
 signal water_capacity_changed(current: int, max_capacity: int)
@@ -46,6 +55,10 @@ var max_health: int = BASE_MAX_HEALTH
 var current_health: int = BASE_MAX_HEALTH
 var input_locked: bool = false
 
+var _is_knocked_back: bool = false
+var _hurt_feedback_cd: float = 0.0
+var _flash_tween: Tween = null
+
 var beer_count: int = 0
 var _beer_effect_left: float = 0.0
 var _beer_effect_active: bool = false
@@ -59,7 +72,6 @@ var _base_hitbox_scale: Vector2 = Vector2.ONE
 
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
-@onready var swing_scissors: AudioStreamPlayer2D = $SwingScissors
 @onready var hitbox: Area2D = $Hitbox
 @onready var _hitbox_collision_shape: CollisionShape2D = $Hitbox/CollisionShape2D
 
@@ -67,7 +79,8 @@ var _base_hitbox_scale: Vector2 = Vector2.ONE
 func _ready() -> void:
 	# Initialise hitbox offset
 	hitbox_offset = hitbox.position
-	_base_hitbox_scale = _hitbox_collision_shape.scale if _hitbox_collision_shape != null else Vector2.ONE
+	var scene_hitbox_scale := _hitbox_collision_shape.scale if _hitbox_collision_shape != null else Vector2.ONE
+	_base_hitbox_scale = scene_hitbox_scale * BASE_SCISSORS_RANGE_MULTIPLIER
 	_load_persistent_state()
 	_apply_persistent_bonuses()
 	_setup_sink_fill_label()
@@ -106,6 +119,15 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 
+	if _hurt_feedback_cd > 0.0:
+		_hurt_feedback_cd = max(_hurt_feedback_cd - _delta, 0.0)
+
+	# While being knocked back, ignore input and just slide with the impulse.
+	if _is_knocked_back:
+		hitbox.monitoring = false
+		move_and_slide()
+		return
+
 	if input_locked:
 		velocity = Vector2.ZERO
 		hitbox.monitoring = false
@@ -113,8 +135,9 @@ func _physics_process(_delta: float) -> void:
 		move_and_slide()
 		return
 
-	# Disable hitbox until an attack is triggered
-	hitbox.monitoring = false
+	# The scissors hitbox is active for the whole swing (the player can keep
+	# moving during it), and off otherwise.
+	hitbox.monitoring = is_attacking
 
 	if shot_cooldown_left > 0.0:
 		shot_cooldown_left = max(shot_cooldown_left - _delta, 0.0)
@@ -144,11 +167,8 @@ func _physics_process(_delta: float) -> void:
 	
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		attack()
-		
-	if is_attacking:
-		velocity = Vector2.ZERO
-		return
-	
+
+	# The player can walk and swing the scissors at the same time — no stop.
 	process_movement()
 	process_animaion()
 	move_and_slide()
@@ -235,6 +255,7 @@ func try_shoot() -> void:
 		direction = last_direction.normalized()
 
 	spawn_projectile(direction)
+	AudioManager.play_sfx("shoot_water" if shot_mode == ShotMode.WATER else "shoot_acid")
 
 	if shot_mode == ShotMode.WATER:
 		consume_water(WATER_SHOT_COST)
@@ -408,7 +429,7 @@ func get_enemy_under_mouse() -> Node2D:
 func attack() -> void:
 	is_attacking = true
 	hitbox.monitoring = true
-	swing_scissors.play()	
+	AudioManager.play_sfx("melee")
 	play_animation("attack", last_direction)
 
 
@@ -443,7 +464,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		body.take_damage(strenght, position)
 
 
-func take_damage(damage: int) -> void:
+func take_damage(damage: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
 	if current_health <= 0:
 		return
 	current_health = max(current_health - damage, 0)
@@ -452,6 +473,43 @@ func take_damage(damage: int) -> void:
 
 	if current_health <= 0:
 		die()
+		return
+
+	# Visual/physical hit feedback, throttled so continuous damage doesn't strobe.
+	if _hurt_feedback_cd <= 0.0:
+		_flash_red()
+		AudioManager.play_sfx("player_hurt")
+		if attacker_position != Vector2.ZERO:
+			_apply_knockback(attacker_position)
+		_hurt_feedback_cd = HURT_FEEDBACK_COOLDOWN
+
+
+func _flash_red() -> void:
+	# Very pronounced red flash held for ~1s, to clearly signal taking damage.
+	if _flash_tween and _flash_tween.is_valid():
+		_flash_tween.kill()
+	animated_sprite_2d.modulate = Color(3.0, 0.0, 0.0, 1.0)
+	_flash_tween = create_tween()
+	_flash_tween.tween_interval(0.55)
+	_flash_tween.tween_property(animated_sprite_2d, "modulate", Color.WHITE, 0.45)
+
+
+func _apply_knockback(attacker_position: Vector2) -> void:
+	var knockback_dir := (global_position - attacker_position)
+	if knockback_dir == Vector2.ZERO:
+		knockback_dir = -last_direction
+	knockback_dir = knockback_dir.normalized()
+
+	_is_knocked_back = true
+	is_attacking = false
+	velocity = knockback_dir * KNOCKBACK_FORCE
+
+	var tween := create_tween()
+	tween.tween_interval(KNOCKBACK_TIME)
+	tween.tween_callback(func() -> void:
+		_is_knocked_back = false
+		velocity = Vector2.ZERO
+	)
 
 
 func die() -> void:
@@ -480,6 +538,7 @@ func try_use_beer() -> void:
 	beer_count = max(beer_count - 1, 0)
 	beer_count_changed.emit(beer_count)
 	_save_persistent_beer()
+	AudioManager.play_sfx("beer_drink")
 
 	_beer_effect_active = true
 	_beer_effect_left = BEER_EFFECT_DURATION
@@ -521,6 +580,22 @@ func heal(amount: int) -> bool:
 
 func heal_one_heart() -> bool:
 	return heal(HEALTH_PER_HEART)
+
+
+# Full reset of combat resources — health, water and acid back to max.
+# Used on the foyer -> level 1 transition to wipe any tutorial-test damage.
+func restore_full_stats() -> void:
+	max_health = maxi(max_health, 1)
+	current_health = max_health
+	current_water_capacity = MAX_WATER_CAPACITY
+	current_acid_capacity = MAX_ACID_CAPACITY
+	is_acid_cooling_down = false
+	acid_cooldown_left = 0.0
+
+	health_changed.emit(current_health, max_health)
+	water_capacity_changed.emit(current_water_capacity, MAX_WATER_CAPACITY)
+	acid_status_changed.emit(current_acid_capacity, MAX_ACID_CAPACITY, false, 0.0)
+	_save_persistent_health()
 
 
 func sync_from_game_state() -> void:
