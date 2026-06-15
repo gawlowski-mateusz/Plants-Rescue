@@ -18,6 +18,13 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameState="*res://scripts/game_state.gd"
+Settings="*res://scripts/settings_manager.gd"
+AudioManager="*res://scripts/audio_manager.gd"
+
+[display]
+
+window/size/mode=2
+window/stretch/mode="canvas_items"
 
 [input]
 

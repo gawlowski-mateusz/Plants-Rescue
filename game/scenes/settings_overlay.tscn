@@ -1,0 +1,161 @@
+[gd_scene load_steps=4 format=3 uid="uid://settingsovl01"]
+
+[ext_resource type="Theme" uid="uid://pixthm0001ab" path="res://assets/themes/pixel_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/settings_overlay.gd" id="2_script"]
+
+[sub_resource type="StyleBoxFlat" id="SB_panel"]
+content_margin_left = 44.0
+content_margin_top = 34.0
+content_margin_right = 44.0
+content_margin_bottom = 34.0
+bg_color = Color(0.1, 0.07, 0.05, 0.97)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.7, 0.3, 1)
+anti_aliasing = false
+
+[node name="SettingsOverlay" type="CanvasLayer"]
+layer = 90
+process_mode = 3
+script = ExtResource("2_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_theme")
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.72)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("SB_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 36
+text = "Ustawienia"
+horizontal_alignment = 1
+
+[node name="MusicRow" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Root/Center/Panel/VBox/MusicRow"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "Muzyka"
+
+[node name="MusicSlider" type="HSlider" parent="Root/Center/Panel/VBox/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 24)
+layout_mode = 2
+size_flags_vertical = 4
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.6
+
+[node name="MusicValue" type="Label" parent="Root/Center/Panel/VBox/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "60%"
+horizontal_alignment = 2
+
+[node name="SfxRow" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Root/Center/Panel/VBox/SfxRow"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "Efekty"
+
+[node name="SfxSlider" type="HSlider" parent="Root/Center/Panel/VBox/SfxRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 24)
+layout_mode = 2
+size_flags_vertical = 4
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.9
+
+[node name="SfxValue" type="Label" parent="Root/Center/Panel/VBox/SfxRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "90%"
+horizontal_alignment = 2
+
+[node name="BrightnessRow" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Root/Center/Panel/VBox/BrightnessRow"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "Jasność"
+
+[node name="BrightnessSlider" type="HSlider" parent="Root/Center/Panel/VBox/BrightnessRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 24)
+layout_mode = 2
+size_flags_vertical = 4
+min_value = 0.3
+max_value = 1.6
+step = 0.01
+value = 1.0
+
+[node name="BrightnessValue" type="Label" parent="Root/Center/Panel/VBox/BrightnessRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+vertical_alignment = 1
+text = "100%"
+horizontal_alignment = 2
+
+[node name="Spacer" type="Control" parent="Root/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="ResumeBtn" type="Button" parent="Root/Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Zamknij"
+
+[node name="MenuBtn" type="Button" parent="Root/Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Powrót do menu głównego"
