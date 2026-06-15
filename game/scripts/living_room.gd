@@ -10,6 +10,8 @@ enum State { PLAY, COMPLETE, GAME_OVER }
 
 const BOSS_TROPHY_UI_SCENE: PackedScene = preload("res://scenes/boss_trophy_ui.tscn")
 const BOSS_REWARD_DIALOG_SCENE: PackedScene = preload("res://scenes/boss_reward_dialog.tscn")
+const SETTINGS_OVERLAY_SCENE: PackedScene = preload("res://scenes/settings_overlay.tscn")
+const LEVEL_INTRO_SCENE: PackedScene = preload("res://scenes/level_intro.tscn")
 
 
 @onready var player: CharacterBody2D = $Player
@@ -34,6 +36,7 @@ const BOSS_REWARD_DIALOG_SCENE: PackedScene = preload("res://scenes/boss_reward_
 var _trophy_ui: Control = null
 var _boss_reward_dialog: CanvasLayer = null
 var _boss_dialog_locked_player: bool = false
+var _settings_overlay: CanvasLayer = null
 
 
 var state: int = State.PLAY
@@ -55,6 +58,15 @@ func _ready() -> void:
 	game_over_screen.visible = false
 
 	var gs := get_node_or_null("/root/GameState")
+
+	# Fresh start when arriving from the foyer (level 0): wipe any tutorial-test
+	# damage/resource use, and skip the onboarding (already shown in the foyer).
+	var from_foyer := false
+	if gs != null and gs.has_method("consume_full_restore"):
+		from_foyer = bool(gs.call("consume_full_restore"))
+	if from_foyer and player.has_method("restore_full_stats"):
+		player.restore_full_stats()
+
 	if gs != null and gs.has_method("save_level_start_stats"):
 		gs.call("save_level_start_stats", player.current_water_capacity, player.current_acid_capacity)
 	elif gs != null and gs.has_method("save_level_start_health"):
@@ -85,14 +97,18 @@ func _ready() -> void:
 	game_over_menu_btn.pressed.connect(_return_to_menu)
 
 	_setup_boss_reward_ui()
+	_setup_settings_overlay()
 
 	_update_labels()
+	_show_level_intro()
 
-	if show_onboarding_tutorials:
+	AudioManager.play_music("gameplay_theme")
+
+	if show_onboarding_tutorials and not from_foyer:
 		# Quick onboarding sequence
-		_queue_tutorial("LPM — strzelaj wodą\nPodlej rośliny aby je uratować", 4.5)
+		_queue_tutorial("PPM — strzelaj wodą\nPodlej rośliny, aby je uratować", 4.5)
 		_queue_tutorial("X — przełącz między wodą a kwasem\nKwas rani wrogów", 4.5)
-		_queue_tutorial("Prawy przycisk myszy — auto-celowanie\nw wroga pod kursorem", 4.5)
+		_queue_tutorial("Środkowy przycisk myszy — auto-celowanie\nw wroga pod kursorem", 4.5)
 		_queue_tutorial("Uratuj wszystkie %d rośliny\ni pokonaj %d zmutowane potwory" % [plants_to_rescue_total, enemies_to_kill_total], 4.5)
 
 
@@ -107,6 +123,8 @@ func _process(delta: float) -> void:
 
 func _on_plant_watered() -> void:
 	plants_watered += 1
+	GameState.campaign_record_watered()
+	AudioManager.play_sfx("pickup_water")
 	_update_labels()
 	_check_objectives()
 
@@ -118,6 +136,12 @@ func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 	var was_watered := false
 	if plant is FriendlyPlant:
 		was_watered = plant.is_watered
+
+	# Tag the resulting enemy so we can count it as a *killed friendly plant*
+	# (not a regular enemy) for the campaign ending stats.
+	if enemy != null:
+		enemy.set_meta("corrupted_plant", true)
+		enemy.set_meta("plant_was_watered", was_watered)
 
 	# If the plant was not watered yet, it no longer needs rescuing.
 	# If it was watered, keep the plant objective unchanged.
@@ -131,6 +155,8 @@ func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 
 func _on_enemy_died(enemy: Node2D) -> void:
 	enemies_killed += 1
+	if enemy != null and bool(enemy.get_meta("corrupted_plant", false)):
+		GameState.campaign_record_plant_killed(bool(enemy.get_meta("plant_was_watered", false)))
 	_update_labels()
 	_handle_boss_defeat(enemy)
 	_check_objectives()
@@ -168,6 +194,31 @@ func _on_boss_reward_dialog_closed() -> void:
 	if _boss_dialog_locked_player and state == State.PLAY:
 		player.input_locked = false
 	_boss_dialog_locked_player = false
+
+
+func _setup_settings_overlay() -> void:
+	var overlays := get_node_or_null("Overlays")
+	if overlays == null or SETTINGS_OVERLAY_SCENE == null:
+		return
+	_settings_overlay = SETTINGS_OVERLAY_SCENE.instantiate() as CanvasLayer
+	if _settings_overlay != null:
+		overlays.add_child(_settings_overlay)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if state != State.PLAY:
+		return
+	if _settings_overlay == null or not _settings_overlay.has_method("open"):
+		return
+	if _settings_overlay.has_method("is_open") and bool(_settings_overlay.call("is_open")):
+		return
+	# Don't open the pause menu while a boss reward dialog is being shown.
+	if _boss_reward_dialog != null and _boss_reward_dialog.visible:
+		return
+	_settings_overlay.call("open", true)
+	get_viewport().set_input_as_handled()
 
 
 func _handle_boss_defeat(enemy: Node2D) -> void:
@@ -280,6 +331,11 @@ func _finish_level() -> void:
 		return
 
 	var gs := get_node_or_null("/root/GameState")
+	if gs != null and gs.has_method("mark_level_completed"):
+		gs.call("mark_level_completed", String(scene_file_path).get_file())
+
+	AudioManager.play_sfx("level_complete")
+
 	if gs != null and bool(gs.get("is_single_level_mode")):
 		state = State.COMPLETE
 		player.input_locked = true
@@ -302,6 +358,22 @@ func _finish_level() -> void:
 	get_tree().change_scene_to_file(next_scene_path)
 
 
+func _show_level_intro() -> void:
+	var overlays := get_node_or_null("Overlays")
+	if overlays == null or LEVEL_INTRO_SCENE == null:
+		return
+	var intro := LEVEL_INTRO_SCENE.instantiate()
+	overlays.add_child(intro)
+	if intro.has_method("show_intro"):
+		intro.call("show_intro", _get_current_level_number(), _get_current_level_display_name())
+
+
+func _get_current_level_number() -> int:
+	var key := String(scene_file_path).get_file()
+	var idx: int = GameState.BASE_LEVELS.find(key)
+	return idx + 1 if idx >= 0 else 1
+
+
 func _get_current_level_display_name() -> String:
 	var path := String(scene_file_path)
 	if path.ends_with("living_room.tscn"):
@@ -320,6 +392,12 @@ func _complete() -> void:
 		return
 	state = State.COMPLETE
 	player.input_locked = true
+
+	# Finishing the final level of a full campaign run -> show one of the endings.
+	if GameState.is_campaign_run:
+		get_tree().change_scene_to_file("res://scenes/ending.tscn")
+		return
+
 	var total_seconds := int(elapsed)
 	var mins := int(total_seconds / 60.0)
 	var secs := total_seconds % 60
@@ -334,6 +412,8 @@ func _complete() -> void:
 func _on_player_health_changed(current: int, _max_health: int) -> void:
 	if current <= 0 and state == State.PLAY:
 		state = State.GAME_OVER
+		AudioManager.stop_music()
+		AudioManager.play_sfx("game_over")
 		await get_tree().create_timer(1.2).timeout
 		game_over_screen.visible = true
 

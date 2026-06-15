@@ -13,14 +13,12 @@
 [ext_resource type="PackedScene" path="res://scenes/beer_effect_ui.tscn" id="12_beer_ui"]
 [ext_resource type="PackedScene" path="res://scenes/water_bottles_pack.tscn" id="13_sink"]
 [ext_resource type="PackedScene" path="res://scenes/medkit_pickup.tscn" id="14_medkit"]
-[ext_resource type="Script" path="res://scripts/fridge.gd" id="15_fridge"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_couch.png" id="20_lr_couch"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_coffee_table.png" id="21_lr_coffee"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_bookshelf.png" id="22_lr_bookshelf"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_tv_cabinet.png" id="23_lr_tv"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_dining_table.png" id="24_lr_dining"]
 [ext_resource type="Texture2D" path="res://assets/images/furniture/living_room_rug.png" id="25_lr_rug"]
-[ext_resource type="Texture2D" path="res://assets/images/furniture/kitchen_fridge.png" id="26_fridge"]
 
 [sub_resource type="RectangleShape2D" id="RS_wall_horiz"]
 size = Vector2(2400, 100)
@@ -37,9 +35,6 @@ size = Vector2(180, 100)
 [sub_resource type="RectangleShape2D" id="RS_bookshelf"]
 size = Vector2(100, 200)
 
-[sub_resource type="RectangleShape2D" id="RS_fridge_interact"]
-size = Vector2(200, 300)
-
 [sub_resource type="RectangleShape2D" id="RS_tv"]
 size = Vector2(250, 80)
 
@@ -51,9 +46,6 @@ size = Vector2(600, 30)
 
 [sub_resource type="RectangleShape2D" id="RS_inner_wall_v"]
 size = Vector2(30, 400)
-
-[sub_resource type="RectangleShape2D" id="RS_fridge_body"]
-size = Vector2(120, 180)
 
 [sub_resource type="RectangleShape2D" id="RS_finish"]
 size = Vector2(120, 120)
@@ -291,31 +283,7 @@ shape = SubResource("RS_couch")
 
 ; === KORYTARZ DOLNY (lewa dolna część — za ścianą wewnętrzną) ===
 
-; Lodówka — przy lewej ścianie w korytarzu
-[node name="Fridge" type="StaticBody2D" parent="Furniture"]
-position = Vector2(200, 920)
-collision_layer = 3
-collision_mask = 0
-
-[node name="Sprite2D" type="Sprite2D" parent="Furniture/Fridge"]
-scale = Vector2(2.2, 2.2)
-texture = ExtResource("26_fridge")
-
-[node name="BeerSpawnPoint" type="Node2D" parent="Furniture/Fridge"]
-position = Vector2(0, 160)
-
-[node name="FridgeInteract" type="Area2D" parent="Furniture/Fridge"]
-collision_layer = 0
-collision_mask = 1
-script = ExtResource("15_fridge")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge/FridgeInteract"]
-shape = SubResource("RS_fridge_interact")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge"]
-shape = SubResource("RS_fridge_body")
-
-; Butelki z wodą — obok lodówki
+; Butelki z wodą
 [node name="WaterBottlesPack" parent="Furniture" unique_id=1140651688 instance=ExtResource("13_sink")]
 position = Vector2(400, 980)
 

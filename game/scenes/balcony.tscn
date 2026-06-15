@@ -1,4 +1,4 @@
-﻿[gd_scene format=3 uid="uid://b4lc0nyrm0a3d"]
+[gd_scene format=3 uid="uid://b4lc0nyrm0a3d"]
 
 [ext_resource type="PackedScene" uid="uid://dftrpkfy22rxb" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/enemy_plant.tscn" id="2_enemy_plant"]
@@ -709,6 +709,18 @@ scale = Vector2(2, 2)
 
 [node name="EnemyPlant4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_enemy_plant")]
 position = Vector2(1700, 950)
+scale = Vector2(2, 2)
+
+[node name="EnemyPlant5" parent="Enemies" instance=ExtResource("2_enemy_plant")]
+position = Vector2(800, 600)
+scale = Vector2(2, 2)
+
+[node name="EnemyPlant6" parent="Enemies" instance=ExtResource("2_enemy_plant")]
+position = Vector2(1300, 850)
+scale = Vector2(2, 2)
+
+[node name="EnemyPlant7" parent="Enemies" instance=ExtResource("2_enemy_plant")]
+position = Vector2(1600, 650)
 scale = Vector2(2, 2)
 
 [node name="BossPalm" parent="Enemies" instance=ExtResource("16_boss_palm")]

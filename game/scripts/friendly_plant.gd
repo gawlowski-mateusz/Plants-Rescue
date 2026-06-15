@@ -69,7 +69,11 @@ func take_damage(_damage: int, _attacker_position: Vector2) -> void:
 		return
 
 	if not is_watered:
-		_corrupt_into_enemy()
+		# take_damage runs inside a physics collision callback; adding an
+		# Area2D-bearing enemy now would change monitoring state mid query-flush.
+		# Guard immediately and defer the actual spawn to the next idle frame.
+		_is_corrupted = true
+		_corrupt_into_enemy.call_deferred()
 		return
 
 	_watered_hits_taken += 1

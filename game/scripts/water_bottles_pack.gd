@@ -1,11 +1,11 @@
 extends Area2D
 
 
-@export var starting_bottles: int = 6
+@export var starting_bottles: int = 4
 @export var refill_amount: int = 25
 @export var refill_cooldown: float = 1.0
 
-var bottles_left: int = 6
+var bottles_left: int = 4
 
 var _player_in_range: bool = false
 var _player: Node2D = null
@@ -13,12 +13,11 @@ var _cooldown_left: float = 0.0
 var _bubble: Control = null
 
 
-@onready var _bottles_container: Node = $Blocker/Bottles
 @onready var _sprite: Sprite2D = $Blocker/Sprite2D
 
 
 func _ready() -> void:
-	bottles_left = clampi(starting_bottles, 0, 6)
+	bottles_left = clampi(starting_bottles, 0, 4)
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -103,6 +102,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not did_refill:
 		return
 
+	AudioManager.play_sfx("water_refill")
 	bottles_left = maxi(bottles_left - 1, 0)
 	_refresh_bottles_visual()
 
@@ -114,20 +114,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _refresh_bottles_visual() -> void:
-	# Fade sprite based on remaining bottles
-	if _sprite != null:
-		var ratio := float(bottles_left) / float(starting_bottles)
-		_sprite.modulate.a = clampf(0.3 + ratio * 0.7, 0.3, 1.0)
-
-	# Also hide old ColorRect bottles if they exist
-	if _bottles_container == null:
+	# The texture is a 64x256 sheet: frame 0 = 4 bottles, 1 = 3, 2 = 2, 3 = 1.
+	# Each used refill removes one bottle by advancing one frame.
+	if _sprite == null:
 		return
-	var bottles := _bottles_container.get_children()
-	var visible_count := clampi(bottles_left, 0, bottles.size())
-	for i in range(bottles.size()):
-		var item := bottles[i]
-		if item is CanvasItem:
-			(item as CanvasItem).visible = i < visible_count
+	if bottles_left <= 0:
+		_sprite.visible = false
+		return
+	_sprite.visible = true
+	_sprite.region_enabled = true
+	var frame := clampi(starting_bottles - bottles_left, 0, 3)
+	_sprite.region_rect = Rect2(0, frame * 64, 64, 64)
 
 
 func _on_body_entered(body: Node) -> void:

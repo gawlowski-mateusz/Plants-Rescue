@@ -1,4 +1,4 @@
-﻿[gd_scene format=3 uid="uid://db0lbytailjir"]
+[gd_scene format=3 uid="uid://db0lbytailjir"]
 
 [ext_resource type="PackedScene" uid="uid://dftrpkfy22rxb" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://n30k8ab5e7bs" path="res://scenes/enemy_plant.tscn" id="2_enemy_plant"]
@@ -51,6 +51,9 @@ size = Vector2(500, 30)
 
 [sub_resource type="RectangleShape2D" id="RS_fridge_body"]
 size = Vector2(120, 180)
+
+[sub_resource type="RectangleShape2D" id="RS_fridge_interact"]
+size = Vector2(200, 300)
 
 [sub_resource type="RectangleShape2D" id="RS_table_round"]
 size = Vector2(160, 160)
@@ -220,7 +223,7 @@ collision_mask = 1
 script = ExtResource("16_fridge")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge/FridgeInteract"]
-shape = SubResource("RS_fridge_body")
+shape = SubResource("RS_fridge_interact")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Furniture/Fridge"]
 shape = SubResource("RS_fridge_body")
@@ -356,6 +359,10 @@ scale = Vector2(2, 2)
 
 [node name="EnemyPlant4" parent="Enemies" unique_id=1593818912 instance=ExtResource("2_enemy_plant")]
 position = Vector2(2100, 950)
+scale = Vector2(2, 2)
+
+[node name="EnemyPlant5" parent="Enemies" instance=ExtResource("2_enemy_plant")]
+position = Vector2(1300, 850)
 scale = Vector2(2, 2)
 
 [node name="BossVine" parent="Enemies" instance=ExtResource("14_boss_vine")]

@@ -55,16 +55,16 @@ func _draw_heart(heart_index: int) -> void:
 			draw_rect(pixel_rect, pixel_color, true)
 
 
-func set_health(new_health: int, max_health: int = DEFAULT_MAX_HEALTH) -> void:
-	self.max_health = max_health if max_health > 0 else 1
-	heart_count = int(ceil(float(self.max_health) / float(HEALTH_PER_HEART)))
-	current_health = clampi(new_health, 0, self.max_health)
+func set_health(new_health: int, new_max: int = DEFAULT_MAX_HEALTH) -> void:
+	max_health = new_max if new_max > 0 else 1
+	heart_count = int(ceil(float(max_health) / float(HEALTH_PER_HEART)))
+	current_health = clampi(new_health, 0, max_health)
 	_recalculate_layout()
 	queue_redraw()
 
 
-func _on_player_health_changed(current: int, max_health: int) -> void:
-	set_health(current, max_health)
+func _on_player_health_changed(current: int, new_max: int) -> void:
+	set_health(current, new_max)
 
 
 func _recalculate_layout() -> void:
