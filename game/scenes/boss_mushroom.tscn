@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/images/enemies/Slime_Green.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/images/enemies/Mushroom_Boss.png" id="1_tex"]
 [ext_resource type="Script" path="res://scripts/boss_mushroom.gd" id="2_script"]
 [ext_resource type="AudioStream" path="res://assets/audio/hit_enemy.mp3" id="3_hit"]
 [ext_resource type="PackedScene" path="res://scenes/health_bar.tscn" id="4_health"]
