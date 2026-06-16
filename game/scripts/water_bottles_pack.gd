@@ -11,6 +11,7 @@ var _player_in_range: bool = false
 var _player: Node2D = null
 var _cooldown_left: float = 0.0
 var _bubble: Control = null
+var _prompt: InteractionPrompt = null
 
 
 @onready var _sprite: Sprite2D = $Blocker/Sprite2D
@@ -21,6 +22,10 @@ func _ready() -> void:
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+
+	_prompt = InteractionPrompt.new()
+	add_child(_prompt)
+	_prompt.set_text("E — uzupełnij wodę")
 
 	_refresh_bottles_visual()
 	#call_deferred("_setup_water_bubble")
@@ -105,6 +110,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	AudioManager.play_sfx("water_refill")
 	bottles_left = maxi(bottles_left - 1, 0)
 	_refresh_bottles_visual()
+	_update_prompt_visibility()
 
 	_cooldown_left = maxf(refill_cooldown, 0.0)
 	if _player.has_method("start_sink_fill_feedback"):
@@ -134,6 +140,7 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_player_in_range = true
 	_player = body as Node2D
+	_update_prompt_visibility()
 
 
 func _on_body_exited(body: Node) -> void:
@@ -143,3 +150,14 @@ func _on_body_exited(body: Node) -> void:
 		return
 	_player_in_range = false
 	_player = null
+	if _prompt != null:
+		_prompt.hide_prompt()
+
+
+func _update_prompt_visibility() -> void:
+	if _prompt == null:
+		return
+	if _player_in_range and bottles_left > 0:
+		_prompt.show_prompt()
+	else:
+		_prompt.hide_prompt()

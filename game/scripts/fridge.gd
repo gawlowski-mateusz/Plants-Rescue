@@ -10,11 +10,16 @@ const BEER_DIALOG_SCENE: PackedScene = preload("res://scenes/boss_reward_dialog.
 var _player_in_range: bool = false
 var _player: Node2D = null
 var _has_spawned: bool = false
+var _prompt: InteractionPrompt = null
 
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+
+	_prompt = InteractionPrompt.new()
+	add_child(_prompt)
+	_prompt.set_text("E — otwórz lodówkę")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -29,6 +34,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	_spawn_beer_pickup()
+	if _prompt != null:
+		_prompt.hide_prompt()
 	get_viewport().set_input_as_handled()
 
 
@@ -93,6 +100,8 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_player_in_range = true
 	_player = body as Node2D
+	if _prompt != null and not _has_spawned:
+		_prompt.show_prompt()
 
 
 func _on_body_exited(body: Node) -> void:
@@ -102,3 +111,5 @@ func _on_body_exited(body: Node) -> void:
 		return
 	_player_in_range = false
 	_player = null
+	if _prompt != null:
+		_prompt.hide_prompt()

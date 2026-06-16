@@ -11,6 +11,7 @@ signal player_near_changed(door_id: String, near: bool)
 
 var _player_in_range: bool = false
 var _is_open: bool = false
+var _prompt: InteractionPrompt = null
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var lock_glow: Sprite2D = $Sprite2D/LockGlow
@@ -21,7 +22,19 @@ var _is_open: bool = false
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	_prompt = InteractionPrompt.new()
+	add_child(_prompt)
 	_refresh_visual()
+
+
+func _update_door_prompt() -> void:
+	if _prompt == null:
+		return
+	if not _player_in_range or _is_open:
+		_prompt.hide_prompt()
+		return
+	_prompt.set_text("E — przejdź dalej" if not is_locked else "Drzwi zablokowane")
+	_prompt.show_prompt()
 
 
 func unlock() -> void:
@@ -29,6 +42,7 @@ func unlock() -> void:
 		return
 	is_locked = false
 	_refresh_visual()
+	_update_door_prompt()
 
 
 func lock() -> void:
@@ -36,12 +50,15 @@ func lock() -> void:
 		return
 	is_locked = true
 	_refresh_visual()
+	_update_door_prompt()
 
 
 func open() -> void:
 	if _is_open:
 		return
 	_is_open = true
+	if _prompt != null:
+		_prompt.hide_prompt()
 	AudioManager.play_sfx("door_open")
 	# Remove physical blocker so player can pass through
 	blocker_shape.set_deferred("disabled", true)
@@ -78,12 +95,14 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player":
 		_player_in_range = true
 		player_near_changed.emit(door_id, true)
+		_update_door_prompt()
 
 
 func _on_body_exited(body: Node2D) -> void:
 	if body.name == "Player":
 		_player_in_range = false
 		player_near_changed.emit(door_id, false)
+		_update_door_prompt()
 
 
 func _unhandled_input(event: InputEvent) -> void:

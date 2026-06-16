@@ -5,6 +5,7 @@ extends Area2D
 
 var _player_in_range: bool = false
 var _player: Node2D = null
+var _prompt: InteractionPrompt = null
 
 
 @onready var _sprite: Sprite2D = $Sprite2D
@@ -15,6 +16,10 @@ func _ready() -> void:
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+
+	_prompt = InteractionPrompt.new()
+	add_child(_prompt)
+	_prompt.set_text("E — wyleczenie (+%d)" % heal_amount)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -49,6 +54,8 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_player_in_range = true
 	_player = body as Node2D
+	if _prompt != null:
+		_prompt.show_prompt()
 
 
 func _on_body_exited(body: Node) -> void:
@@ -58,3 +65,5 @@ func _on_body_exited(body: Node) -> void:
 		return
 	_player_in_range = false
 	_player = null
+	if _prompt != null:
+		_prompt.hide_prompt()
