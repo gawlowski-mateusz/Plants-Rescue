@@ -9,6 +9,8 @@ extends Control
 @onready var summary: Label = %Summary
 @onready var stats: Label = %Stats
 @onready var back_btn: Button = %BackBtn
+@onready var bottom_panel: PanelContainer = $BottomPanel
+@onready var bottom_vbox: VBoxContainer = $BottomPanel/VBox
 
 
 func _ready() -> void:
@@ -21,6 +23,8 @@ func _ready() -> void:
 	summary.text = d["summary"]
 	stats.text = "Uratowane rośliny: %d        Zniszczone rośliny: %d" % [
 		GameState.campaign_plants_watered, GameState.campaign_plants_killed]
+	# Grow the bottom panel upward so longer endings are never clipped.
+	call_deferred("_fit_bottom_panel")
 
 	back_btn.pressed.connect(_back_to_menu)
 	# The finishing level already plays a completion chime; here we just set the
@@ -37,9 +41,11 @@ func _variant_data(variant: int) -> Dictionary:
 				"color": Color(0.55, 1.0, 0.45),
 				"music": "menu_theme",
 				"sfx": "level_complete",
-				"summary": "Uratowałeś wszystkie rośliny i nie skrzywdziłeś żadnej.\n"
-					+ "Dom znów tętni życiem, a wdzięczna zieleń otula każdy kąt.\n"
-					+ "Jesteś prawdziwym obrońcą roślin — zapanował pokój.",
+				"summary": "Udało się! Wszystkie przyjazne rośliny zostały podlane, "
+					+ "a po zbuntowanych zostały już tylko liście. Jednakże zrobiła się "
+					+ "niemała pustka, ale trzeba patrzeć na pozytywy — mieszkanie "
+					+ "ocalało, a koledzy po powrocie z wyspy nigdy się nie domyślą, "
+					+ "do czego tu doszło!",
 			}
 		3:
 			return {
@@ -48,9 +54,13 @@ func _variant_data(variant: int) -> Dictionary:
 				"color": Color(1.0, 0.35, 0.25),
 				"music": "boss_palm",
 				"sfx": "game_over",
-				"summary": "Wybrałeś przemoc. Ogień strawił dom, a rośliny zwróciły\n"
-					+ "się przeciw Tobie. Z popiołów wyrasta zielona furia...\n"
-					+ "Wojna człowieka z roślinami dopiero się zaczyna.",
+				"summary": "Ja tutaj stawiam warunki — rzeźnia, która tu powstała, "
+					+ "była wyłącznie na ich życzenie. To rośliny powinny mi być "
+					+ "podległe, a mord będzie dla nich nauczką na przyszłość... "
+					+ "Mieszkanie jest w opłakanym stanie, podobnie jak moje "
+					+ "samopoczucie. Nawet nie chcę myśleć, co pomyślą moi koledzy, "
+					+ "kiedy wrócą z wyspy i zobaczą, do czego tu doszło. Jestem "
+					+ "skończony — tak jak wszystkie rośliny, które zabiłem...",
 			}
 		_:
 			return {
@@ -59,10 +69,20 @@ func _variant_data(variant: int) -> Dictionary:
 				"color": Color(0.95, 0.88, 0.55),
 				"music": "menu_theme",
 				"sfx": "level_complete",
-				"summary": "Po drodze zdarzyło się kilka pomyłek, lecz dom udało się\n"
-					+ "uratować. Większość roślin jest bezpieczna i świat\n"
-					+ "odetchnął z ulgą. Nie było idealnie — ale dobrze.",
+				"summary": "Próbowałem uratować wszystkie, lecz jak widać każdy z nas "
+					+ "popełnia mniejsze lub większe błędy. Większość moich roślin "
+					+ "przeżyła, a te, które poległy, musiałem szybko zakopywać w "
+					+ "śmietniku... Mimo wszystko trzeba patrzeć na pozytywy — "
+					+ "mieszkanie ocalało, a koledzy po powrocie z wyspy nigdy się "
+					+ "nie domyślą, do czego tu doszło!",
 			}
+
+
+func _fit_bottom_panel() -> void:
+	# Panel keeps its bottom edge (offset_bottom) and extends its top edge up to
+	# fit the content plus the stylebox margins (22 px top + 22 px bottom).
+	var needed: float = bottom_vbox.get_combined_minimum_size().y + 44.0
+	bottom_panel.offset_top = bottom_panel.offset_bottom - needed
 
 
 func _back_to_menu() -> void:
