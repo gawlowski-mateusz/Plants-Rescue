@@ -14,20 +14,37 @@ signal closed
 @onready var brightness_slider: HSlider = %BrightnessSlider
 @onready var brightness_value: Label = %BrightnessValue
 @onready var resume_btn: Button = %ResumeBtn
+@onready var controls_btn: Button = %ControlsBtn
 @onready var menu_btn: Button = %MenuBtn
+
+const CONTROLS_SCENE: PackedScene = preload("res://scenes/controls_overlay.tscn")
+const CONFIRM_SCENE: PackedScene = preload("res://scenes/confirm_dialog.tscn")
 
 var _in_game: bool = false
 var _syncing: bool = false
+var _controls: CanvasLayer = null
+var _confirm: CanvasLayer = null
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	resume_btn.pressed.connect(_close)
+	controls_btn.pressed.connect(_open_controls)
 	menu_btn.pressed.connect(_on_menu_pressed)
 	music_slider.value_changed.connect(_on_music_changed)
 	sfx_slider.value_changed.connect(_on_sfx_changed)
 	brightness_slider.value_changed.connect(_on_brightness_changed)
+
+	_controls = CONTROLS_SCENE.instantiate()
+	add_child(_controls)
+	_confirm = CONFIRM_SCENE.instantiate()
+	add_child(_confirm)
+
+
+func _open_controls() -> void:
+	if _controls != null and _controls.has_method("open"):
+		_controls.call("open")
 
 
 func open(in_game: bool) -> void:
@@ -53,6 +70,13 @@ func _close() -> void:
 
 
 func _on_menu_pressed() -> void:
+	# Confirm before abandoning the run (error prevention, Nielsen H3/H5).
+	_confirm.call("ask",
+		"Wrócić do menu głównego?\nPostęp bieżącej rozgrywki przepadnie.",
+		Callable(self, "_do_return_to_menu"))
+
+
+func _do_return_to_menu() -> void:
 	get_tree().paused = false
 	var gs := get_node_or_null("/root/GameState")
 	if gs != null and gs.has_method("reset_run"):
@@ -110,6 +134,11 @@ func _update_value_labels() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
+		return
+	# Let the controls/confirm sub-overlays consume Esc while they are open.
+	if _controls != null and _controls.has_method("is_open") and bool(_controls.call("is_open")):
+		return
+	if _confirm != null and _confirm.has_method("is_open") and bool(_confirm.call("is_open")):
 		return
 	if event.is_action_pressed("ui_cancel"):
 		_close()

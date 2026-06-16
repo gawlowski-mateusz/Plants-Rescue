@@ -146,6 +146,13 @@ horizontal_alignment = 2
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
+[node name="ControlsBtn" type="Button" parent="Root/Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Sterowanie"
+
 [node name="ResumeBtn" type="Button" parent="Root/Center/Panel/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(440, 60)

@@ -20,9 +20,11 @@ extends Control
 
 
 const SETTINGS_OVERLAY_SCENE: PackedScene = preload("res://scenes/settings_overlay.tscn")
+const CONFIRM_SCENE: PackedScene = preload("res://scenes/confirm_dialog.tscn")
 const SNAKE_SCENE_PATH: String = "res://scenes/snake_minigame.tscn"
 
 var _settings_overlay: CanvasLayer = null
+var _confirm: CanvasLayer = null
 
 @onready var completion_toast: PanelContainer = %CompletionToast
 @onready var completion_label: Label = $CompletionToast/Label
@@ -62,6 +64,8 @@ func _ready() -> void:
 
 	_settings_overlay = SETTINGS_OVERLAY_SCENE.instantiate()
 	add_child(_settings_overlay)
+	_confirm = CONFIRM_SCENE.instantiate()
+	add_child(_confirm)
 
 	# Click sound on every menu button.
 	for btn in [play_button, level_select_button, settings_button, quit_button,
@@ -122,9 +126,11 @@ func _on_cactus_right_anim_finished() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# The settings overlay handles its own input (incl. closing on ui_cancel).
+	# The settings/confirm overlays handle their own input (incl. ui_cancel).
 	if _settings_overlay != null and _settings_overlay.has_method("is_open") \
 			and bool(_settings_overlay.call("is_open")):
+		return
+	if _confirm != null and _confirm.has_method("is_open") and bool(_confirm.call("is_open")):
 		return
 
 	if level_select_overlay.visible:
@@ -197,6 +203,10 @@ func _play_level(index: int) -> void:
 
 
 func _quit_game() -> void:
+	_confirm.call("ask", "Wyjść z gry?", Callable(self, "_do_quit"))
+
+
+func _do_quit() -> void:
 	get_tree().quit()
 
 
