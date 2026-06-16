@@ -8,10 +8,6 @@
 | **Zakres** | Pełny przebieg kampanii: menu → przedpokój (samouczek) → 4 poziomy → bossowie → zakończenia, a także menu pauzy, ustawienia, ekran sterowania, wybór poziomu, sekretny poziom |
 | **Ocena ogólna** | **Dobra–bardzo dobra**; brak błędów krytycznych, pozostały drobne usprawnienia (severity 1–2) |
 
-> To druga iteracja ewaluacji. Pierwsza runda (raport `2026-06-16_ewaluacja-heurystyczna-UX.md`)
-> wykryła 10 problemów o wadze 2–3; większość została wdrożona. Niniejszy dokument
-> ocenia **aktualny** stan gry i wskazuje, co jeszcze można dopracować.
-
 ---
 
 ## 1. Cel i metodyka
@@ -196,7 +192,7 @@ Brak problemów o wadze 3–4. Pozostałe to dopracowania (severity 1–2).
 
 ---
 
-## 7. Co poprawiono od poprzedniej ewaluacji
+## 7. Wcześniejsze rozwiazania problemów na podstawie pierwszej rundy ewaluacji
 
 | Wcześniejszy problem | Status |
 |---|---|
@@ -228,4 +224,4 @@ błędów. Pozostałe uwagi to dopracowania o wadze 1–2.
    większy nakład, do rozważenia w dalszej kolejności.
 
 Końcowa ocena użyteczności: **4/5** — solidna, gotowa do prezentacji gra z drobnym
-potencjałem do dalszego szlifu.
+potencjałem do dalszego rozwoju.
