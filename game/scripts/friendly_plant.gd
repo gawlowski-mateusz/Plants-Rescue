@@ -12,6 +12,8 @@ const WATERED_CORRUPT_DELAY_SEC: float = 0.6
 const DIALOG_VISIBLE_SEC: float = 2.0
 const DIALOG_FADE_SEC: float = 0.25
 
+const WATER_HINT_RADIUS: float = 230.0
+
 @export var corrupted_enemy_scene: PackedScene = preload("res://scenes/enemy_plant.tscn")
 
 signal plant_fully_watered
@@ -24,6 +26,12 @@ var _is_corrupted: bool = false
 var _watered_hits_taken: int = 0
 var _pending_corrupt: bool = false
 var _dialog_tween: Tween = null
+
+var _base_sprite_scale: Vector2 = Vector2.ONE
+var _attention_tween: Tween = null
+
+var _prompt: InteractionPrompt = null
+var _player_ref: Node2D = null
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var bloomed_sprite: Sprite2D = $BloomedSprite
@@ -39,6 +47,56 @@ func _ready() -> void:
 	watered_label.visible = false
 	dialog_label.visible = false
 	water_bar.update_water(water_level)
+	# Wayfinding (Nielsen H6/H7): a gentle breathing pulse draws the player's
+	# eye to plants that still need rescuing. Stops once watered or corrupted.
+	# The group lets the off-screen indicator find plants that still need help.
+	add_to_group("unrescued_plants")
+	_base_sprite_scale = animated_sprite_2d.scale
+	_start_attention_pulse()
+
+	# Contextual hint: "podlej wodą" shown while the player stands near a plant
+	# that still needs rescuing (Nielsen H6).
+	_prompt = InteractionPrompt.new()
+	add_child(_prompt)
+	_prompt.set_text("PPM — podlej wodą")
+
+
+func _process(_delta: float) -> void:
+	if is_watered or _is_corrupted or _pending_corrupt:
+		if _prompt != null:
+			_prompt.hide_prompt()
+		return
+	if _player_ref == null or not is_instance_valid(_player_ref):
+		var scene := get_tree().current_scene
+		if scene != null:
+			_player_ref = scene.get_node_or_null("Player") as Node2D
+	if _player_ref == null or _prompt == null:
+		return
+	if global_position.distance_squared_to(_player_ref.global_position) <= WATER_HINT_RADIUS * WATER_HINT_RADIUS:
+		_prompt.show_prompt()
+	else:
+		_prompt.hide_prompt()
+
+
+func _start_attention_pulse() -> void:
+	if _attention_tween != null and _attention_tween.is_valid():
+		_attention_tween.kill()
+	_attention_tween = create_tween().set_loops()
+	_attention_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_attention_tween.tween_property(animated_sprite_2d, "scale", _base_sprite_scale * 1.07, 0.7)
+	_attention_tween.tween_property(animated_sprite_2d, "scale", _base_sprite_scale * 0.97, 0.7)
+
+
+func _stop_attention_pulse() -> void:
+	# Watered or corrupted -> no longer a rescue target.
+	remove_from_group("unrescued_plants")
+	set_process(false)
+	if _prompt != null:
+		_prompt.hide_prompt()
+	if _attention_tween != null and _attention_tween.is_valid():
+		_attention_tween.kill()
+	_attention_tween = null
+	animated_sprite_2d.scale = _base_sprite_scale
 
 
 func water(amount: int = WATER_PER_SHOT) -> void:
@@ -121,6 +179,7 @@ func _hide_dialog() -> void:
 
 func _corrupt_into_enemy() -> void:
 	_is_corrupted = true
+	_stop_attention_pulse()
 	if corrupted_enemy_scene == null:
 		queue_free()
 		return
@@ -157,6 +216,7 @@ func _corrupt_into_enemy() -> void:
 func _bloom() -> void:
 	# Swap to the bloomed sprite — the label is no longer needed,
 	# since the new look makes the rescue visually obvious.
+	_stop_attention_pulse()
 	watered_label.visible = false
 	water_bar.visible = false
 	_play_bloom_effect()

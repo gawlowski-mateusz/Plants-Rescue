@@ -68,6 +68,10 @@ var _slow_speed_multiplier: float = 1.0
 var _sink_fill_left: float = 0.0
 var _sink_fill_label: Label = null
 
+var _hint_label: Label = null
+var _hint_left: float = 0.0
+var _out_of_water_cd: float = 0.0
+
 var _base_hitbox_scale: Vector2 = Vector2.ONE
 
 
@@ -84,7 +88,28 @@ func _ready() -> void:
 	_load_persistent_state()
 	_apply_persistent_bonuses()
 	_setup_sink_fill_label()
+	_setup_hint_label()
 	call_deferred("emit_initial_ui_state")
+
+
+func _setup_hint_label() -> void:
+	_hint_label = Label.new()
+	_hint_label.theme = PIXEL_THEME
+	_hint_label.visible = false
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_hint_label.custom_minimum_size = Vector2(300, 28)
+	_hint_label.position = Vector2(-150, -188)
+	_hint_label.z_index = 50
+	add_child(_hint_label)
+
+
+func _show_player_hint(text: String, duration: float) -> void:
+	if _hint_label == null:
+		return
+	_hint_label.text = text
+	_hint_label.visible = true
+	_hint_left = duration
 
 
 func _setup_sink_fill_label() -> void:
@@ -114,6 +139,7 @@ func emit_initial_ui_state() -> void:
 func _physics_process(_delta: float) -> void:
 	_process_sink_fill_feedback(_delta)
 	_process_beer_effect(_delta)
+	_process_hint(_delta)
 
 	if current_health <= 0:
 		velocity = Vector2.ZERO
@@ -240,6 +266,10 @@ func try_shoot() -> void:
 		return
 
 	if shot_mode == ShotMode.WATER and current_water_capacity < WATER_SHOT_COST:
+		# Diagnostic feedback (Nielsen H9): tell the player why nothing happened.
+		if _out_of_water_cd <= 0.0:
+			_show_player_hint("Brak wody!\nUzupełnij przy zgrzewce", 2.0)
+			_out_of_water_cd = 2.5
 		return
 
 	if shot_mode == ShotMode.ACID:
@@ -320,6 +350,15 @@ func start_sink_fill_feedback(duration: float) -> void:
 	_update_sink_fill_label()
 	if _sink_fill_label != null:
 		_sink_fill_label.visible = _sink_fill_left > 0.0
+
+
+func _process_hint(delta: float) -> void:
+	if _out_of_water_cd > 0.0:
+		_out_of_water_cd = maxf(_out_of_water_cd - delta, 0.0)
+	if _hint_left > 0.0:
+		_hint_left = maxf(_hint_left - delta, 0.0)
+		if _hint_left <= 0.0 and _hint_label != null:
+			_hint_label.visible = false
 
 
 func _process_sink_fill_feedback(delta: float) -> void:
