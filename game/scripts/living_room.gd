@@ -12,6 +12,8 @@ const BOSS_TROPHY_UI_SCENE: PackedScene = preload("res://scenes/boss_trophy_ui.t
 const BOSS_REWARD_DIALOG_SCENE: PackedScene = preload("res://scenes/boss_reward_dialog.tscn")
 const SETTINGS_OVERLAY_SCENE: PackedScene = preload("res://scenes/settings_overlay.tscn")
 const LEVEL_INTRO_SCENE: PackedScene = preload("res://scenes/level_intro.tscn")
+const STORY_SCROLL_SCENE: PackedScene = preload("res://scenes/story_scroll.tscn")
+const OFFSCREEN_INDICATOR_SCENE: PackedScene = preload("res://scenes/offscreen_indicator.tscn")
 
 
 @onready var player: CharacterBody2D = $Player
@@ -101,6 +103,7 @@ func _ready() -> void:
 
 	_update_labels()
 	_show_level_intro()
+	_setup_offscreen_indicator()
 
 	AudioManager.play_music("gameplay_theme")
 
@@ -151,6 +154,10 @@ func _on_plant_corrupted_into_enemy(enemy: Node2D, plant: Node) -> void:
 	enemies_to_kill_total += 1
 	_update_labels()
 	_check_objectives()
+
+	# Diagnostic feedback (Nielsen H9): explain why a rescue target turned hostile.
+	if not _tutorial_playing:
+		_queue_tutorial("Zaatakowana roślina zbuntowała się\ni stała się wrogiem!", 2.5)
 
 
 func _on_enemy_died(enemy: Node2D) -> void:
@@ -360,12 +367,43 @@ func _finish_level() -> void:
 
 func _show_level_intro() -> void:
 	var overlays := get_node_or_null("Overlays")
+	if overlays == null:
+		return
+	# Story first, on a parchment scroll that pauses the game; the brief title
+	# card follows once the player dismisses it.
+	var desc := _get_current_level_description()
+	if not desc.strip_edges().is_empty() and STORY_SCROLL_SCENE != null:
+		var scroll := STORY_SCROLL_SCENE.instantiate()
+		overlays.add_child(scroll)
+		if scroll.has_signal("continued"):
+			scroll.continued.connect(_show_level_title_card)
+		if scroll.has_method("show_story"):
+			scroll.call("show_story",
+				"POZIOM %d — %s" % [_get_current_level_number(), _get_current_level_display_name()],
+				desc)
+	else:
+		_show_level_title_card()
+
+
+func _show_level_title_card() -> void:
+	var overlays := get_node_or_null("Overlays")
 	if overlays == null or LEVEL_INTRO_SCENE == null:
 		return
 	var intro := LEVEL_INTRO_SCENE.instantiate()
 	overlays.add_child(intro)
 	if intro.has_method("show_intro"):
 		intro.call("show_intro", _get_current_level_number(), _get_current_level_display_name())
+
+
+func _setup_offscreen_indicator() -> void:
+	var overlays := get_node_or_null("Overlays")
+	if overlays == null or OFFSCREEN_INDICATOR_SCENE == null:
+		return
+	var indicator := OFFSCREEN_INDICATOR_SCENE.instantiate()
+	overlays.add_child(indicator)
+	var arrow := indicator.get_node_or_null("Arrow")
+	if arrow != null and arrow.has_method("set_player"):
+		arrow.call("set_player", player)
 
 
 func _get_current_level_number() -> int:
@@ -385,6 +423,19 @@ func _get_current_level_display_name() -> String:
 	if path.ends_with("balcony.tscn"):
 		return "Pokój gamingowy"
 	return "Poziom"
+
+
+func _get_current_level_description() -> String:
+	var path := String(scene_file_path)
+	if path.ends_with("living_room.tscn"):
+		return "Czas stawić czoła wyzwaniu! Salon — niegdyś główne miejsce zapijania studenckich żalów, dziś dosłownie pole bitwy... Nie, to nie pozostałości po ostatniej integracji, to znak, że coś poszło tutaj bardzo nie tak w trakcie mojej nieobecności. Doniczki powywracane, liście zwiędłe, przynajmniej zapach powietrza pozostał podobny. Ale nie mogę tego tak zostawić — czas chwycić nożyczki, pistolet na kwas i wodę i ruszyć w tango. Mieszkanie samo się nie uratuje."
+	if path.ends_with("kitchen.tscn"):
+		return "Kuchnia widać nie służy już do swoich pierwotnych celów - zgotowało się tu prawdziwe piekło. Nikt z lokatorów nie zadbał o nawodnienie inne niż siebie. Ale zaraz, czy to oznacza PIWO? Rośliny mogą zaczekać, muszę znaleźć swoje paliwo, zanim przystąpię do działania. Bez niego moja misja może się okazać niewykonalna..."
+	if path.ends_with("bedroom.tscn"):
+		return "Myślałem, że będzie prosto, a tu jeszcze większa niespodzianka. W roślinach nie widać żadnego życia, a na końcu pokoju w miejscu skarpetek pojawiło się coś strasznego i strasznie śmierdzącego... Czy to może być GRZYB?"
+	if path.ends_with("balcony.tscn"):
+		return "Nie ocalał nawet mój pokój do gier... Rośliny przejęły komputer i każdy zakamarek pokoju. Chciałoby się powiedzieć, że to w końcu przyszła pora na CS'a, lecz to niestety pora na finalny akt walki i próby przywrócenia porządku i pokoju w pokoju."
+	return ""
 
 
 func _complete() -> void:

@@ -5,6 +5,8 @@ enum State { LETTER, FOYER, TRANSITION, GAME_OVER }
 
 
 const SETTINGS_OVERLAY_SCENE: PackedScene = preload("res://scenes/settings_overlay.tscn")
+const LEVEL_INTRO_SCENE: PackedScene = preload("res://scenes/level_intro.tscn")
+const PIXEL_THEME: Theme = preload("res://assets/themes/pixel_theme.tres")
 
 
 @onready var player: CharacterBody2D = $Player
@@ -25,6 +27,7 @@ var _tutorial_tween: Tween = null
 var _tutorial_queue: Array = []
 var _tutorial_playing: bool = false
 var _settings_overlay: CanvasLayer = null
+var _skip_btn: Button = null
 
 
 func _ready() -> void:
@@ -76,16 +79,54 @@ func _on_letter_continue() -> void:
 	player.input_locked = false
 	state = State.FOYER
 
+	# Title card consistent with the other levels (this is "level 0").
+	_show_intro()
+
 	# The exit door stays locked until every tutorial message has been shown
 	# (see _on_tutorials_finished). These describe all of the game mechanics.
+	# Core combat/movement is taught up-front; item usage (lodówka, zgrzewka,
+	# apteczka) is now taught contextually when the player walks up to each object.
 	_queue_tutorial("WASD — poruszanie się", 3.0)
 	_queue_tutorial("Lewy przycisk myszy — atak nożyczkami\n(walka wręcz z wrogami)", 4.0)
 	_queue_tutorial("Prawy przycisk myszy — strzelanie\nPodlewaj wodą przyjazne rośliny, aby je uratować", 5.0)
 	_queue_tutorial("X — przełącz między wodą a kwasem\nKwasem ranisz wrogie rośliny", 4.5)
 	_queue_tutorial("Środkowy przycisk myszy — auto-celowanie\nnamierza wroga pod kursorem", 4.5)
-	_queue_tutorial("Q — wypij piwo z lodówki\nDaje chwilowe przyspieszenie", 4.0)
-	_queue_tutorial("Apteczka leczy, a zgrzewka uzupełnia wodę\n— wystarczy do nich podejść", 4.5)
-	_queue_tutorial("SPACJA lub E — interakcja\n(drzwi, lodówka)", 3.5)
+	_queue_tutorial("SPACJA lub E — interakcja z obiektami\n(podejdź do obiektu — podpowiedź pojawi się sama)", 4.0)
+
+	_show_skip_button()
+
+
+func _show_intro() -> void:
+	if LEVEL_INTRO_SCENE == null:
+		return
+	var intro := LEVEL_INTRO_SCENE.instantiate()
+	$Overlays.add_child(intro)
+	if intro.has_method("show_intro"):
+		intro.call("show_intro", 0, "Wprowadzenie")
+
+
+func _show_skip_button() -> void:
+	if _skip_btn != null:
+		return
+	_skip_btn = Button.new()
+	_skip_btn.theme = PIXEL_THEME
+	_skip_btn.text = "Pomiń samouczek »"
+	_skip_btn.anchor_left = 1.0
+	_skip_btn.anchor_top = 1.0
+	_skip_btn.anchor_right = 1.0
+	_skip_btn.anchor_bottom = 1.0
+	_skip_btn.offset_left = -300.0
+	_skip_btn.offset_top = -72.0
+	_skip_btn.offset_right = -20.0
+	_skip_btn.offset_bottom = -20.0
+	_skip_btn.pressed.connect(_skip_tutorials)
+	ui_layer.add_child(_skip_btn)
+
+
+func _skip_tutorials() -> void:
+	_tutorial_queue.clear()
+	_tutorial_playing = false
+	_on_tutorials_finished()
 
 
 # ---------------------------------------------------------------
@@ -156,7 +197,10 @@ func _play_next_tutorial() -> void:
 
 
 func _on_tutorials_finished() -> void:
-	# All mechanics explained -> open the way out.
+	# All mechanics explained (or skipped) -> open the way out.
+	if _skip_btn != null:
+		_skip_btn.queue_free()
+		_skip_btn = null
 	if door1.is_locked:
 		door1.unlock()
 
